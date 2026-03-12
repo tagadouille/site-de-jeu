@@ -4,7 +4,8 @@ import { run } from "./connex.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const app = express();
-const port = 4321;
+const PORT = 4321;
+const PATH = "http://localhost:" + PORT;
 
 app.set("view engine", "ejs");
 app.use(express.static('public'));
@@ -19,9 +20,9 @@ app.post("/", (req, res) => {
     res.send("POST received");
 });
 
-run({ app: app, action: "localhost:" + port });
+run({ app: app, action: PATH });
 
 /*------------------------LISTEN-----------------------*/
-app.listen(port, () => {
-    console.log("Server launched on : http://localhost:" + port);
+app.listen(PORT, () => {
+    console.log("Server launched on : " + PATH);
 });
