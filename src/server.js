@@ -1,6 +1,6 @@
 /*------------------------IMPORT-----------------------*/
 import express from "express";
-import { run } from "./connex.js";
+import { run } from "./formProcess/connex.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const app = express();

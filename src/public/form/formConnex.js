@@ -8,7 +8,7 @@ let submit = $("#submit");
 /*------------------DOM MANIPULATION----------------------*/
 $(document).ready(function () {
 
-    console.log("dfd");
+    submit_form();
 
     // Display the password
     $("#aff").on("mousedown", function () {
@@ -28,28 +28,33 @@ $(document).ready(function () {
     // Verification if each input are filled
     $("form").on("keyup", function () {
 
-        let valid_field_count = 0;
-        let field_count = 0;
-
-        $(this).children().each(function () {
-
-            if($(this).is("input") && !$(this).is(":submit")) {
-
-                if($(this).val() !== "") {
-                    valid_field_count++;
-                    $(this).css("border", "solid black 1px");
-                }
-                else {
-                    $(this).css("border", "solid red 1px");
-                }
-                field_count++;
-            }
-        });
-
-        if(valid_field_count === field_count) {
-            submit.prop("disabled", false);
-            return;
-        }
-        submit.prop("disabled", true);
+        submit_form();
     });
 });
+
+function submit_form() {
+
+    let valid_field_count = 0;
+    let field_count = 0;
+
+    $("form").children().each(function () {
+
+        if($(this).is("input") && !$(this).is(":submit")) {
+
+            if($(this).val() !== "") {
+                valid_field_count++;
+                $(this).css("border", "solid black 1px");
+            }
+            else {
+                $(this).css("border", "solid red 2px");
+            }
+            field_count++;
+        }
+    });
+
+    if(valid_field_count === field_count) {
+        submit.prop("disabled", false);
+        return;
+    }
+    submit.prop("disabled", true);
+}
