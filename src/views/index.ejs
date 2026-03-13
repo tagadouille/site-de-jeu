@@ -11,6 +11,8 @@
     <title>Main Page</title>
 </head>
 <body>
+
+    <!-- HEADER -->
     <header>
         <img src="/favicon.ico" alt="Logo">
         <nav>
@@ -18,13 +20,16 @@
             <a href="/signup">Sign up</a>
         </nav>
     </header>
-    <article>
-        <h1>List of the games : </h1>
 
+    <h1 id = "title">List of the games : </h1>
+
+    <article class = "games-list">
+        
+        <!-- GAMES DISPLAY -->
         <% games.forEach(game => { %>
             <a href="/game/<%= game.name %>">
                 <div class = "game">
-                    <p class = "game-name"><%= game.name %></p>
+                    <h2 class = "game-name"><%= game.name %></h2>
                     <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image">
                     <p><%= game.description%></p>
                 </div>
