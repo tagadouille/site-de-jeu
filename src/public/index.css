@@ -1,0 +1,27 @@
+header {
+    text-align: center;
+    background-color: blueviolet;
+    padding-bottom: 10px;
+}
+
+.game {
+
+    border : solid black 1px;
+    margin : 10px;
+    padding: 10px;
+    display: inline-block;
+
+    background-color: #000027;
+    color: white;
+}
+
+.game img {
+    width: 250px;
+    height: 250px;
+}
+
+footer {
+    text-align: center;
+    background-color: blueviolet;
+    padding-top: 10px;
+}

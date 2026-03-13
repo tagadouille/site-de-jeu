@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="/jquery-4.0.0.min.js"></script>
+    <script src="/index.js"></script>
+    <link rel="stylesheet" href="/index.css">
+
+    <title>Main Page</title>
+</head>
+<body>
+    <header>
+        <img src="/favicon.ico" alt="Logo">
+        <nav>
+            <a href="/signin">Sign in</a>
+            <a href="/signup">Sign up</a>
+        </nav>
+    </header>
+    <article>
+        <h1>List of the games : </h1>
+
+        <% games.forEach(game => { %>
+            <a href="/game/<%= game.name %>">
+                <div class = "game">
+                    <p class = "game-name"><%= game.name %></p>
+                    <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image">
+                    <p><%= game.description%></p>
+                </div>
+            </a>
+        <% }) %>
+    </article>
+    <footer>
+        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Explicabo quidem inventore ipsam pariatur iste laboriosam officiis? Culpa, molestias eius. Facilis totam a voluptatum possimus, dolorem tempore tempora. Exercitationem, culpa non?</p>
+    </footer>
+</body>
+</html>

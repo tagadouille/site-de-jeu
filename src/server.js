@@ -13,7 +13,13 @@ app.use(express.urlencoded({ extended: true }));
 
 /*------------------------ROUTES-----------------------*/
 app.get("/", (req, res) => {
-    res.redirect("signin");
+    res.render("index.ejs", {
+        games : [
+            { name: "Game 1", image : "/favicon.ico", description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit." },
+            { name: "Game 2", image : "/favicon.ico", description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit." },
+            { name: "Game 3", image : "/favicon.ico", description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit." }
+        ]
+    });
 });
 
 app.post("/", (req, res) => {
