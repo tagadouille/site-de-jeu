@@ -37,19 +37,16 @@ function submit_form() {
     let valid_field_count = 0;
     let field_count = 0;
 
-    $("form").children().each(function () {
+    $("form input:not([type='submit'])").each(function () {
 
-        if($(this).is("input") && !$(this).is(":submit")) {
-
-            if($(this).val() !== "") {
-                valid_field_count++;
-                $(this).css("border", "solid black 1px");
-            }
-            else {
-                $(this).css("border", "solid red 2px");
-            }
-            field_count++;
+        if($(this).val() !== "") {
+            valid_field_count++;
+            $(this).css("border", "solid black 1px");
         }
+        else {
+            $(this).css("border", "solid red 2px");
+        }
+        field_count++;
     });
 
     if(valid_field_count === field_count) {
