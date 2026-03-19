@@ -1,0 +1,28 @@
+.games-list {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: center;
+    gap: 10px;
+}
+
+.games-list a {
+    display: block;
+    text-decoration: none;
+}
+
+.game {
+    border: solid black 1px;
+
+    padding: 20px;
+    margin: 20px;
+    
+    background-color: #000027;
+
+    color: white;
+    text-align: center;
+}
+
+.game img {
+    width: 250px;
+    height: 250px;
+}
