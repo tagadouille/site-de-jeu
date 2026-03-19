@@ -19,62 +19,34 @@
     text-decoration: none;
 }
 
+.game-wrapper {
+    transform-origin: center;
+    animation: rotateGame 2s infinite ease-in-out; /* rotation perpétuelle */
+}
+
 .game {
-    border: solid black 1px;
+    height: 80%;
+
 
     padding: 20px;
-    margin: 20px;
-    
     background-color: #000027;
 
     color: white;
     text-align: center;
 
     border-radius: 15px;
+    border: 1px solid black;
 
-    transform-origin: center;
-    animation: rotateGame 2s infinite ease-in-out;
-    transition: transform 0.3s ease;
+    transition: transform 1.5s ease; /* zoom fluide */
 }
 
-.game:hover {
-    transform: scale(1.1);
+.game-wrapper:hover .game {
+    transform: scale(1.1); /* zoom au hover */
 }
 
-.game:not(:hover) {
-    transform: scale(1);
-}
-
-/*-------------ANIMATION---------------*/
-
-@keyframes growGame {
-    from {
-        transform: scale(1);
-    }
-    to {
-        transform: scale(1.1);
-    }
-}
-
-@keyframes shrinkGame {
-    
-    from {
-        transform: scale(1.1);
-    }
-    to {
-        transform: scale(1);
-    }
-}
-
+/* Balancier perpétuel sur le wrapper */
 @keyframes rotateGame {
-    
-    0% {
-        transform: rotate(-1deg);
-    }
-    50% {
-        transform: rotate(1deg);
-    }
-    100% {
-        transform: rotate(-1deg);
-    }
+    0%   { transform: rotate(-1deg); }
+    50%  { transform: rotate(1deg); }
+    100% { transform: rotate(-1deg); }
 }
