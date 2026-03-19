@@ -3,7 +3,7 @@
  * @param {*} server 
  * @author Elias
  */
-export function run(server) {
+export function runConnex(server) {
 
     let app = server.app;
     let baseUrl = server.action;

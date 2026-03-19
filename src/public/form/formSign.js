@@ -1,27 +1,23 @@
 /*------------------RECUPERATION----------------------*/
 let username = $("#username");
 let email = $("#email");
-
+let lastname = $("#lastname");
+let firstname = $("#firstname");
 let password = $("#password");
 let submit = $("#submit");
-
 /*------------------DOM MANIPULATION----------------------*/
 $(document).ready(function () {
 
     submit_form();
 
     // Display the password
-    $("#aff").on("mousedown", function () {
+    $("#aff").on("change", function () {
 
-        if(!$(this).prop("checked")) {
-            password.each(function () {
-                $(this).attr("type", "text");
-            });
+        if($(this).prop("checked")) {
+            password.attr("type", "text");
         }
         else {
-            password.each(function () {
-                $(this).attr("type", "password");
-            });
+            password.attr("type", "password");
         }
     });
 
