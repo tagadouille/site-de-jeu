@@ -8,37 +8,52 @@
     <script src="/index.js"></script>
     <link rel="stylesheet" href="/index.css">
 
+    <!-- Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <title>Main Page</title>
 </head>
-<body>
+<body class = "container-fluid px-0">
 
     <!-- HEADER -->
-    <header>
-        <img src="/favicon.ico" alt="Logo">
-        <nav>
-            <a href="/signin">Sign in</a>
-            <a href="/signup">Sign up</a>
-            <a href="/profile">Profile</a>
+    <header id = "header">
+        <nav class = "navbar px-3">
+            <img src="/favicon.ico" alt="Logo">
+
+            <div class = "text-end">
+                <a href="/signin" class = "btn btn-sign">Sign in</a>
+                <a href="/signup" class = "btn btn-sign">Sign up</a>
+                <a href="/profile" class = "btn btn-sign">Profile</a>
+            </div>
         </nav>
     </header>
 
     <h1 id = "title">List of the games : </h1>
 
-    <article class = "games-list">
+    <article class = "games-list row justify-content-center">
         
         <!-- GAMES DISPLAY -->
         <% games.forEach(game => { %>
-            <a href="/game/<%= game.name %>">
-                <div class = "game">
-                    <h2 class = "game-name"><%= game.name %></h2>
-                    <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image">
-                    <p><%= game.description%></p>
-                </div>
-            </a>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="/game/<%= game.name %>" class = "px-0">
+                    <div class = "game">
+                        <h2 class = "game-name"><%= game.name %></h2>
+                        <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image img-thumbnail">
+                        <p><%= game.description%></p>
+                    </div>
+                </a>
+            </div>
         <% }) %>
     </article>
-    <footer>
+
+    <!--FOOTER-->
+    <footer class = "bg-dark text-light">
         <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Explicabo quidem inventore ipsam pariatur iste laboriosam officiis? Culpa, molestias eius. Facilis totam a voluptatum possimus, dolorem tempore tempora. Exercitationem, culpa non?</p>
     </footer>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

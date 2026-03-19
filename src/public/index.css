@@ -1,12 +1,21 @@
-.games-list {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    justify-content: center;
-    gap: 10px;
+/*-------------HEADER---------------*/
+#header {
+    background-color: #260048;
 }
 
+.btn.btn-sign {
+    background-color: #048259;
+    color: white;
+    border: none;
+}
+
+.btn.btn-sign:hover {
+    background-color: #0F683F;
+}
+
+/*-------------GAME LIST---------------*/
+
 .games-list a {
-    display: block;
     text-decoration: none;
 }
 
@@ -20,9 +29,52 @@
 
     color: white;
     text-align: center;
+
+    border-radius: 15px;
+
+    transform-origin: center;
+    animation: rotateGame 2s infinite ease-in-out;
+    transition: transform 0.3s ease;
 }
 
-.game img {
-    width: 250px;
-    height: 250px;
+.game:hover {
+    transform: scale(1.1);
+}
+
+.game:not(:hover) {
+    transform: scale(1);
+}
+
+/*-------------ANIMATION---------------*/
+
+@keyframes growGame {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes shrinkGame {
+    
+    from {
+        transform: scale(1.1);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes rotateGame {
+    
+    0% {
+        transform: rotate(-1deg);
+    }
+    50% {
+        transform: rotate(1deg);
+    }
+    100% {
+        transform: rotate(-1deg);
+    }
 }
