@@ -1,16 +1,28 @@
-const express = require('express');
+/*------------------------IMPORT-----------------------*/
+import express from "express";
+import { run } from "./formProcess/connex.js";
+
+/*------------------------SERVER CONFIG-----------------------*/
 const app = express();
+const PORT = 4321;
+const PATH = "http://localhost:" + PORT;
 
-app.set('view engine', 'ejs');
-
+app.set("view engine", "ejs");
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-    
+/*------------------------ROUTES-----------------------*/
+app.get("/", (req, res) => {
+    res.redirect("signin");
 });
 
-app.post('/', (req, res) => {
-    
+app.post("/", (req, res) => {
+    res.send("POST received");
 });
 
-app.listen(4321);
+run({ app: app, action: PATH });
+
+/*------------------------LISTEN-----------------------*/
+app.listen(PORT, () => {
+    console.log("Server launched on : " + PATH);
+});
