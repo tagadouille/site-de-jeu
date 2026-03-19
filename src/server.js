@@ -2,6 +2,7 @@
 import express from "express";
 import { runConnex } from "./formProcess/connex.js";
 import { runSign } from "./formProcess/sign.js";
+import { runProfile } from "./profile/profile.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const app = express();
@@ -29,6 +30,7 @@ app.post("/", (req, res) => {
 
 runConnex({ app: app, action: PATH });
 runSign({ app: app, action: PATH });
+runProfile({ app: app, action: PATH });
 
 /*------------------------LISTEN-----------------------*/
 app.listen(PORT, () => {
