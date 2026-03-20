@@ -23,9 +23,14 @@
             <img src="/favicon.ico" alt="Logo">
 
             <div class = "text-end">
-                <a href="/signin" class = "btn btn-sign">Sign in</a>
-                <a href="/signup" class = "btn btn-sign">Sign up</a>
-                <a href="/profile" class = "btn btn-sign">Profile</a>
+
+                <% if(is_connect) {%>
+                    <a href="/profile" class = "btn btn-sign">Profile</a>
+                <%}
+                else { %>
+                    <a href="/signin" class = "btn btn-sign">Sign in</a>
+                    <a href="/signup" class = "btn btn-sign">Sign up</a>
+                <% } %>
             </div>
         </nav>
     </header>
