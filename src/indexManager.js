@@ -15,7 +15,8 @@ export function runIndex(app) {
             );
         }
         res.render("index.ejs", {
-            games: games
+            games: games,
+            title: "Home Page"
         });
     });
 }
