@@ -47,13 +47,7 @@
 
                     <!-- BUTTONS -->
                     <div class="navbar-nav ms-auto d-none d-md-flex">
-                        <% if(is_connect) { %>
-                            <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
-                        <% 
-                    } else { %>
-                            <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
-                            <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
-                        <% } %>
+                        <% nav_buttons() %>
                     </div>
 
                 </div>
@@ -67,15 +61,19 @@
 
                     <!-- BUTTONS MOBILE (centered) -->
                     <div class="navbar-nav d-flex justify-content-center">
-                        <% if(is_connect) { %>
-                            <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
-                        <% } else { %>
-                            <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
-                            <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
-                        <% } %>
+                        <% nav_buttons() %>
                     </div>
                 </div>
             </div>
+
+            <% function nav_buttons() {
+                if(is_connect) { %>
+                        <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
+                    <% } else { %>
+                        <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
+                        <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
+                <% }
+            } %>
 
         </nav>
     </header>
