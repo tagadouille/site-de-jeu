@@ -16,7 +16,7 @@ export function runIndex(app) {
         }
         res.render("index.ejs", {
             games: games,
-            is_connect : false, //TODO SESSION
+            is_connect : true, //TODO SESSION
             is_display_buttons : true //TODO SESSION
         });
     });

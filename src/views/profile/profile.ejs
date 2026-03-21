@@ -1,17 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/jquery-4.0.0.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/style.css">
-    <title>User Profile</title>
-</head>
-<body>
-    <h1>User Profile</h1>
+<%- include('../partials/header.ejs', {
+        title : "User Profile",
+        is_connect : true,
+        is_display_buttons : true,
+        script : "/profile.js",
+        
+        stylesheet_html: 
+        '<link rel="stylesheet" href="/css-styles/style.css">' +
+        '<link rel="stylesheet" href="/css-styles/profile.css">'
+    }) 
+%>
+    <h1 id = "title">User Profile</h1>
 
-    <div>
-        <h2>Personal Information</h2>
+    <div id = "personal-info">
+        <h2>Personal Informations</h2>
         <p><strong>Username:</strong> <%= user.username %></p>
         <p><strong>Email:</strong> <%= user.email %></p>
         <p><strong>First Name:</strong> <%= user.firstname %></p>
@@ -35,6 +36,6 @@
         </ul>
     </div>
 
-    <a href="/">Back to home</a>
-</body>
-</html>
+    <a href="/" class = "btn btn-sign">Back to home</a>
+
+<%- include('../partials/footer.ejs') %>

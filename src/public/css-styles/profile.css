@@ -1,0 +1,10 @@
+#personal-info {
+    background-color: #f9f9f9;
+    border: solid 1px #d0d0d0;
+    box-shadow: #a4a4a4;
+
+    padding: 20px;
+    border-radius: 8px;
+
+    text-align: center;
+}

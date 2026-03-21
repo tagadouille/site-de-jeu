@@ -37,6 +37,7 @@ h3 {
 
 #title {
     margin: 20px;
+    font-weight: bold;
 }
 
 /* ----- FORMULAIRES ----- */
@@ -76,7 +77,7 @@ input[type="checkbox"] {
 }
 
 /* ----- BOUTONS ----- */
-button,
+form button,
 input[type="submit"] {
     width: 100%;
     padding: 12px 20px;
