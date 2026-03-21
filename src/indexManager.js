@@ -16,8 +16,8 @@ export function runIndex(app) {
         }
         res.render("index.ejs", {
             games: games,
-            title: "Home Page",
             is_connect : false, //TODO SESSION
+            is_display_buttons : true //TODO SESSION
         });
     });
 }

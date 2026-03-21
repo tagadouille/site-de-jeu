@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <script src="/jquery-4.0.0.min.js" type="text/javascript"></script>
-    <script defer src="/form/formSign.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/style.css">
-    <title>Sign Up</title>
-</head>
+<%- include('../partials/header.ejs', { 
+    title: "Sign In",
+    is_connect: false, 
+    is_display_buttons: false,
+    script : "/form/formSign.js",
+    stylesheet_html: '<link rel="stylesheet" href="/style.css">'
+}) %>
 <body>
     <h1>Sign Up</h1>
 
@@ -42,5 +40,4 @@
         <br>
         <button type="submit">Register</button>
     </form>
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>

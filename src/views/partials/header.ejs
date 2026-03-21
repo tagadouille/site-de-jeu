@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="/jquery-4.0.0.min.js"></script>
-    <script src="/index.js"></script>
-    <link rel="stylesheet" href="/index.css">
+    <script defer src="<%= script %>>"></script>
+    
+    <link rel = "stylesheet" href = "/header.css">
+    <%- stylesheet_html %>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -42,7 +44,7 @@
 
                     <!-- SEARCH -->
                     <div class="mx-auto w-25 d-none d-md-block">
-                        <input type="text" class="form-control" placeholder="Search..." name="search">
+                        <% search_bar() %>
                     </div>
 
                     <!-- BUTTONS -->
@@ -56,7 +58,7 @@
                 <div class="d-block d-md-none w-100 mt-2">
                     <!-- SEARCH MOBILE -->
                     <div class="mb-2">
-                        <input type="text" class="form-control" placeholder="Search..." name="search">
+                        <% search_bar() %>
                     </div>
 
                     <!-- BUTTONS MOBILE (centered) -->
@@ -66,14 +68,26 @@
                 </div>
             </div>
 
-            <% function nav_buttons() {
-                if(is_connect) { %>
-                        <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
-                    <% } else { %>
-                        <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
-                        <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
-                <% }
-            } %>
+            <!-----------FACTORISATION FUNCTIONS-------------->
+            <% 
+                function nav_buttons() {
+
+                    if(is_display_buttons) {
+
+                        if(is_connect) { %>
+                                <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
+                            <% } else { %>
+                                <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
+                                <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
+                        <% }
+                    }
+                } 
+                
+                function search_bar() { %>
+                     <input type="text" class="form-control" placeholder="Search..." name="search">
+                    <%
+                }
+            %>
 
         </nav>
     </header>
