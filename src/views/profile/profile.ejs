@@ -11,7 +11,7 @@
 %>
     <h1 id = "title">User Profile</h1>
 
-    <div id = "personal-info">
+    <div id = "personal-info" class = "mb-4 p-2 border rounded">
         <h2>Personal Informations</h2>
         <p><strong>Username:</strong> <%= user.username %></p>
         <p><strong>Email:</strong> <%= user.email %></p>
@@ -19,23 +19,26 @@
         <p><strong>Last Name:</strong> <%= user.lastname %></p>
     </div>
 
-    <div>
+    <div class = "mb-4 p-2 border rounded">
         <h2>Games you want to play</h2>
-        <ul>
+
+        <ul id = "game-list" class = "row">
             <% if (games && games.length > 0) { %>
+
                 <% games.forEach(game => { %>
-                    <li>
+                    <li class = "game-item col-12 my-1 mx-0 px-4 py-2 border rounded">
                         <strong><%= game.name %></strong><br>
-                        <img src="<%= game.image %>" alt="<%= game.name %>" style="width: 50px; height: 50px;"><br>
+                        <img src="<%= game.image %>" alt="<%= game.name %>" class = "img-fluid"><br>
                         <%= game.description %>
                     </li>
                 <% }); %>
+
             <% } else { %>
-                <li>No game selected.</li>
+                <span>No game selected.</span>
             <% } %>
         </ul>
     </div>
 
-    <a href="/" class = "btn btn-sign">Back to home</a>
+    <a href="/" class = "btn btn-sign mx-2">Back to home</a>
 
 <%- include('../partials/footer.ejs') %>
