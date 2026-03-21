@@ -12,6 +12,7 @@ body {
     color: #333;
     background-color: #f9f9f9;
     padding: 20px;
+    padding-top: 0px;
 }
 
 /* ----- HEADINGS ----- */
@@ -34,6 +35,10 @@ h3 {
     color: #555;
 }
 
+#title {
+    margin: 20px;
+}
+
 /* ----- FORMULAIRES ----- */
 form {
     max-width: 500px;
@@ -52,7 +57,7 @@ label {
     color: #333;
 }
 
-input[type="text"],
+form input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea {
@@ -91,7 +96,7 @@ input[type="submit"]:hover {
 }
 
 /* ----- CONTENEURS ----- */
-div {
+form div {
     margin: 10px 0;
 }
 
