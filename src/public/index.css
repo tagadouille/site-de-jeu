@@ -3,6 +3,20 @@
     background-color: #260048;
 }
 
+
+
+/*----------------SEARCH BAR-----------------*/
+.search-container {
+    position: relative;
+}
+
+/*----------------BUTTONS-----------------*/
+
+#toggler {
+    background-color: #3B155D;
+    border: none;
+}
+
 .btn.btn-sign {
     background-color: #048259;
     color: white;
@@ -13,6 +27,22 @@
     background-color: #0F683F;
 }
 
+.search-input {
+    height: 50px;
+    border-radius: 30px;
+    padding-left: 35px;
+    border: #0F683F 1px solid;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #260048;
+}
+
 /*-------------GAME LIST---------------*/
 
 .games-list a {
@@ -21,7 +51,7 @@
 
 .game-wrapper {
     transform-origin: center;
-    animation: rotateGame 2s infinite ease-in-out; /* rotation perpétuelle */
+    animation: rotateGame 2s infinite ease-in-out; /* permanent rotation */
 }
 
 .game {
@@ -37,14 +67,14 @@
     border-radius: 15px;
     border: 1px solid black;
 
-    transition: transform 1.5s ease; /* zoom fluide */
+    transition: transform 1.5s ease;
 }
 
 .game-wrapper:hover .game {
-    transform: scale(1.1); /* zoom au hover */
+    transform: scale(1.1); /* hover scale */
 }
 
-/* Balancier perpétuel sur le wrapper */
+/* Rotations for the wrapper */
 @keyframes rotateGame {
     0%   { transform: rotate(-1deg); }
     50%  { transform: rotate(1deg); }
