@@ -1,40 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/jquery-4.0.0.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/style.css">
-    <title>User Profile</title>
-</head>
-<body>
-    <h1>User Profile</h1>
+<%- include('../partials/header.ejs', {
+        title : "User Profile",
+        is_connect : true,
+        is_display_buttons : true,
+        script : "/profile.js",
+        
+        stylesheet_html: 
+        '<link rel="stylesheet" href="/css-styles/style.css">' +
+        '<link rel="stylesheet" href="/css-styles/profile.css">'
+    }) 
+%>
+    <h1 id = "title">User Profile</h1>
 
-    <div>
-        <h2>Personal Information</h2>
+    <div id = "personal-info" class = "mb-4 p-2 border rounded">
+        <h2>Personal Informations</h2>
         <p><strong>Username:</strong> <%= user.username %></p>
         <p><strong>Email:</strong> <%= user.email %></p>
         <p><strong>First Name:</strong> <%= user.firstname %></p>
         <p><strong>Last Name:</strong> <%= user.lastname %></p>
+        <p><strong>Status:</strong> 
+            <% if (user.status === 'online') { %>
+                🟢 Online
+            <% } else if (user.status === 'busy') { %>
+                🔴 Busy
+            <% } else if (user.status === 'offline') { %>
+                ⚫ Offline
+            <% } else { %>
+                <%= user.status %>
+            <% } %>
+        </p>
+    </div>
+    <div class="mb-4 p-3 border rounded">
+        <h2>Update Status</h2>
+        <form action="/profile" method="POST">
+            <input type="hidden" name="formType" value="updateStatus">
+            
+            <div class="mb-3">
+                <label for="statusSelect" class="form-label"><strong>Choose your status:</strong></label>
+                <select name="status" id="statusSelect" class="form-select">
+                    <option value="online" <%= user.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
+                    <option value="busy" <%= user.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
+                    <option value="offline" <%= user.status === 'offline' ? 'selected' : '' %>>⚫ Offline</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-secondary">Update Status</button>
+        </form>
+    </div>
+    <div class="col-md-6 mb-4 p-3 border rounded">
+        <h2>Update Password</h2>
+        <form action="/profile" method="POST">
+            <input type="hidden" name="formType" value="updatePassword">
+            
+            <div class="mb-2">
+                <label><strong>Current Password:</strong></label>
+                <input type="password" name="currentPassword" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label><strong>New Password:</strong></label>
+                <input type="password" name="newPassword" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label><strong>Confirm New Password:</strong></label>
+                <input type="password" name="confirmPassword" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Update Password</button>
+        </form>
     </div>
 
-    <div>
+    <div class="mb-4 p-3 border rounded">
+    <h2>Manage My Games</h2>
+    <form action="/profile" method="POST">
+        <input type="hidden" name="formType" value="updateGames">
+        
+        <div class="mb-3">
+            <p><strong>Choose games you want to play:</strong></p>
+            <% allGames.forEach(game => { %>
+                <% const isChecked = games.some(g => g.id === game.id) ? 'checked' : ''; %>
+                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="selectedGames" value="<%= game.id %>" id="<%= game.id %>" <%= isChecked %>>
+                    <label class="form-check-label" for="<%= game.id %>"><%= game.name %></label>
+                </div>
+            <% }); %>
+        </div>
+        <button type="submit" class="btn btn-success">Save My Games</button>
+    </form>
+    </div>
+
+    <div class = "mb-4 p-2 border rounded">
         <h2>Games you want to play</h2>
-        <ul>
+
+        <ul id = "game-list" class = "row">
             <% if (games && games.length > 0) { %>
+
                 <% games.forEach(game => { %>
-                    <li>
+                    <li class = "game-item col-12 my-1 mx-0 px-4 py-2 border rounded">
                         <strong><%= game.name %></strong><br>
-                        <img src="<%= game.image %>" alt="<%= game.name %>" style="width: 50px; height: 50px;"><br>
+                        <img src="<%= game.image %>" alt="<%= game.name %>" class = "img-fluid"><br>
                         <%= game.description %>
                     </li>
                 <% }); %>
+
             <% } else { %>
-                <li>No game selected.</li>
+                <span>No game selected.</span>
             <% } %>
         </ul>
     </div>
 
-    <a href="/">Back to home</a>
-</body>
-</html>
+    <a href="/" class = "btn btn-sign mx-2">Back to home</a>
+
+<%- include('../partials/footer.ejs') %>

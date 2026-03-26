@@ -1,0 +1,35 @@
+/*-------------HEADER---------------*/
+#header {
+    background-color: #260048;
+    padding: 0px;
+    padding-top: 0px;
+}
+
+/*----------------SEARCH BAR-----------------*/
+.search-container {
+    position: relative;
+}
+
+/*----------------BUTTONS-----------------*/
+
+#toggler {
+    background-color: #3B155D;
+    border: none;
+}
+
+.btn.btn-sign {
+    background-color: #048259;
+    color: white;
+    border: none;
+}
+
+.btn.btn-sign:hover {
+    background-color: #0F683F;
+}
+
+.search-input {
+    border-radius: 30px;
+    padding-left: 35px;
+    border: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

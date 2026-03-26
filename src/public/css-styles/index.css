@@ -1,0 +1,37 @@
+/*-------------GAME LIST---------------*/
+
+.games-list a {
+    text-decoration: none;
+}
+
+.game-wrapper {
+    transform-origin: center;
+    animation: rotateGame 2s infinite ease-in-out; /* permanent rotation */
+}
+
+.game {
+    height: 80%;
+
+
+    padding: 20px;
+    background-color: #000027;
+
+    color: white;
+    text-align: center;
+
+    border-radius: 15px;
+    border: 1px solid black;
+
+    transition: transform 1.5s ease;
+}
+
+.game-wrapper:hover .game {
+    transform: scale(1.1); /* hover scale */
+}
+
+/* Rotations for the wrapper */
+@keyframes rotateGame {
+    0%   { transform: rotate(-1deg); }
+    50%  { transform: rotate(1deg); }
+    100% { transform: rotate(-1deg); }
+}
