@@ -6,7 +6,12 @@
 
 .game-wrapper {
     transform-origin: center;
-    animation: rotateGame 2s infinite ease-in-out; /* permanent rotation */
+    animation: rotateGame 4s infinite ease-in-out; /* permanent rotation */
+}
+
+.game-image {
+    width: 40%;
+    height: auto;
 }
 
 .game {

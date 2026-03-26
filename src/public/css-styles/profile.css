@@ -9,7 +9,12 @@
 #game-list {
     list-style-type: none;
     padding: 0;
-    overflow-y: scroll;
+}
+
+#game-list-wrapper {
+    height: 500px;
+    overflow-y: auto;
+    background-color: #d0d0d0;
 }
 
 .game-item {

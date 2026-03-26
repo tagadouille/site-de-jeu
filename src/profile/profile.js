@@ -8,20 +8,26 @@ export function runProfile(server) {
     let app = server.app;
     let baseUrl = server.action;
 
-        const dummyUser = {
-            username: "user123",
-            email: "user123@example.com",
-            firstname: "user",
-            lastname: "123",
-            status : "online"
-        };
+    const dummyUser = {
+        username: "user123",
+        email: "user123@example.com",
+        firstname: "user",
+        lastname: "123",
+        status : "online"
+    };
 
-        const allAvailableGames = [
+    const allAvailableGames = [
         { id: "g1", name: "Game 1", image: "/favicon.ico", description: "Description of Game 1." },
         { id: "g2", name: "Game 2", image: "/favicon.ico", description: "Description of Game 2." },
         { id: "g3", name: "Game 3", image: "/favicon.ico", description: "Description of Game 3." },
         { id: "g4", name: "Game 4", image: "/favicon.ico", description: "Description of Game 4." }
     ];
+
+    for (let index = 0; index < 10; index++) {
+        allAvailableGames.push(
+            { id: "g" + (index + 5), name: "Game " + (index + 5), image: "/favicon.ico", description: "Description of Game " + (index + 5) + "." }
+        );
+    }
 
     
     let dummyGames = [ allAvailableGames[0], allAvailableGames[1] ];
