@@ -1,44 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <script src="/jquery-4.0.0.min.js"></script>
-    <script src="/index.js"></script>
-    <link rel="stylesheet" href="/index.css">
-
-    <title>Main Page</title>
-</head>
-<body>
-
-    <!-- HEADER -->
-    <header>
-        <img src="/favicon.ico" alt="Logo">
-        <nav>
-            <a href="/signin">Sign in</a>
-            <a href="/signup">Sign up</a>
-            <a href="/profile">Profile</a>
-        </nav>
-    </header>
+<%- include('partials/header.ejs', {
+        title : "Home Page",
+        script : "/index.js",
+        stylesheet_html: 
+        '<link rel="stylesheet" href="/css-styles/index.css">' +
+        '<link rel="stylesheet" href="/css-styles/style.css">'
+    }) %>
 
     <h1 id = "title">List of the games : </h1>
 
-    <article class = "games-list">
+    <article class = "games-list row justify-content-center">
         
-        <!-- GAMES DISPLAY -->
+        <!----------------- GAMES DISPLAY -------------------------->
         <% games.forEach(game => { %>
-            <a href="/game/<%= game.name %>">
-                <div class = "game">
-                    <h2 class = "game-name"><%= game.name %></h2>
-                    <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image">
-                    <p><%= game.description%></p>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <div class = "game-wrapper p-0 m-2">
+                    <a href="/game/<%= game.name %>" class = "p-0">
+                        <div class = "game">
+                            <h2 class = "game-name"><%= game.name %></h2>
+                            <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image img-thumbnail">
+                            <p><%= game.description%></p>
+                        </div>
+                    </a>
                 </div>
-            </a>
+
+            </div>
         <% }) %>
     </article>
-    <footer>
-        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Explicabo quidem inventore ipsam pariatur iste laboriosam officiis? Culpa, molestias eius. Facilis totam a voluptatum possimus, dolorem tempore tempora. Exercitationem, culpa non?</p>
-    </footer>
-</body>
-</html>
+    
+<%- include('partials/footer.ejs') %>

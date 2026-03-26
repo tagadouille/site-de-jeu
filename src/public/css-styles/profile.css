@@ -1,0 +1,25 @@
+#personal-info {
+    background-color: #f9f9f9;
+    border: solid 1px #d0d0d0;
+    box-shadow: #a4a4a4;
+
+    text-align: center;
+}
+
+#game-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.game-item {
+    background-color: #000027;
+    border: 1px solid white;
+
+    text-align: left;
+
+    color: white;
+}
+
+.game-item:hover {
+    background-color: #000036;
+}

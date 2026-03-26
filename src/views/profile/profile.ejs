@@ -1,40 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/jquery-4.0.0.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/style.css">
-    <title>User Profile</title>
-</head>
-<body>
-    <h1>User Profile</h1>
+<%- include('../partials/header.ejs', {
+        title : "User Profile",
+        is_connect : true,
+        is_display_buttons : true,
+        script : "/profile.js",
+        
+        stylesheet_html: 
+        '<link rel="stylesheet" href="/css-styles/style.css">' +
+        '<link rel="stylesheet" href="/css-styles/profile.css">'
+    }) 
+%>
+    <h1 id = "title">User Profile</h1>
 
-    <div>
-        <h2>Personal Information</h2>
+    <div id = "personal-info" class = "mb-4 p-2 border rounded">
+        <h2>Personal Informations</h2>
         <p><strong>Username:</strong> <%= user.username %></p>
         <p><strong>Email:</strong> <%= user.email %></p>
         <p><strong>First Name:</strong> <%= user.firstname %></p>
         <p><strong>Last Name:</strong> <%= user.lastname %></p>
     </div>
 
-    <div>
+    <div class = "mb-4 p-2 border rounded">
         <h2>Games you want to play</h2>
-        <ul>
+
+        <ul id = "game-list" class = "row">
             <% if (games && games.length > 0) { %>
+
                 <% games.forEach(game => { %>
-                    <li>
+                    <li class = "game-item col-12 my-1 mx-0 px-4 py-2 border rounded">
                         <strong><%= game.name %></strong><br>
-                        <img src="<%= game.image %>" alt="<%= game.name %>" style="width: 50px; height: 50px;"><br>
+                        <img src="<%= game.image %>" alt="<%= game.name %>" class = "img-fluid"><br>
                         <%= game.description %>
                     </li>
                 <% }); %>
+
             <% } else { %>
-                <li>No game selected.</li>
+                <span>No game selected.</span>
             <% } %>
         </ul>
     </div>
 
-    <a href="/">Back to home</a>
-</body>
-</html>
+    <a href="/" class = "btn btn-sign mx-2">Back to home</a>
+
+<%- include('../partials/footer.ejs') %>
