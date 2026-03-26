@@ -9,6 +9,7 @@
 #game-list {
     list-style-type: none;
     padding: 0;
+    overflow-y: scroll;
 }
 
 .game-item {

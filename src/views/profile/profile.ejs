@@ -29,42 +29,45 @@
             <% } %>
         </p>
     </div>
-    <div class="mb-4 p-3 border rounded">
-        <h2>Update Status</h2>
-        <form action="/profile" method="POST">
-            <input type="hidden" name="formType" value="updateStatus">
-            
-            <div class="mb-3">
-                <label for="statusSelect" class="form-label"><strong>Choose your status:</strong></label>
-                <select name="status" id="statusSelect" class="form-select">
-                    <option value="online" <%= user.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
-                    <option value="busy" <%= user.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
-                    <option value="offline" <%= user.status === 'offline' ? 'selected' : '' %>>⚫ Offline</option>
-                </select>
-            </div>
-            
-            <button type="submit" class="btn btn-secondary">Update Status</button>
-        </form>
-    </div>
-    <div class="col-md-6 mb-4 p-3 border rounded">
-        <h2>Update Password</h2>
-        <form action="/profile" method="POST">
-            <input type="hidden" name="formType" value="updatePassword">
-            
-            <div class="mb-2">
-                <label><strong>Current Password:</strong></label>
-                <input type="password" name="currentPassword" class="form-control" required>
-            </div>
-            <div class="mb-2">
-                <label><strong>New Password:</strong></label>
-                <input type="password" name="newPassword" class="form-control" required>
-            </div>
-            <div class="mb-2">
-                <label><strong>Confirm New Password:</strong></label>
-                <input type="password" name="confirmPassword" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">Update Password</button>
-        </form>
+
+    <div class = "row">
+        <div class="col-md-6 mb-4 p-3 border rounded">
+            <h2>Update Status</h2>
+            <form action="/profile" method="POST">
+                <input type="hidden" name="formType" value="updateStatus">
+                
+                <div class="mb-3">
+                    <label for="statusSelect" class="form-label"><strong>Choose your status:</strong></label>
+                    <select name="status" id="statusSelect" class="form-select">
+                        <option value="online" <%= user.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
+                        <option value="busy" <%= user.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
+                        <option value="offline" <%= user.status === 'offline' ? 'selected' : '' %>>⚫ Offline</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-sign">Update Status</button>
+            </form>
+        </div>
+        <div class="col-md-6 mb-4 p-3 border rounded">
+            <h2>Update Password</h2>
+            <form action="/profile" method="POST">
+                <input type="hidden" name="formType" value="updatePassword">
+                
+                <div class="mb-2">
+                    <label><strong>Current Password:</strong></label>
+                    <input type="password" name="currentPassword" class="form-control" required>
+                </div>
+                <div class="mb-2">
+                    <label><strong>New Password:</strong></label>
+                    <input type="password" name="newPassword" class="form-control" required>
+                </div>
+                <div class="mb-2">
+                    <label><strong>Confirm New Password:</strong></label>
+                    <input type="password" name="confirmPassword" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-sign mt-3">Update Password</button>
+            </form>
+        </div>
     </div>
 
     <div class="mb-4 p-3 border rounded">
@@ -83,12 +86,12 @@
                 </div>
             <% }); %>
         </div>
-        <button type="submit" class="btn btn-success">Save My Games</button>
+        <button type="submit" class="btn btn-sign">Save My Games</button>
     </form>
     </div>
 
     <div class = "mb-4 p-2 border rounded">
-        <h2>Games you want to play</h2>
+        <h2>Games that I want to play :</h2>
 
         <ul id = "game-list" class = "row">
             <% if (games && games.length > 0) { %>
@@ -107,6 +110,6 @@
         </ul>
     </div>
 
-    <a href="/" class = "btn btn-sign mx-2">Back to home</a>
+    <a href="/" class = "btn btn-sign m-2">Back to home</a>
 
 <%- include('../partials/footer.ejs') %>
