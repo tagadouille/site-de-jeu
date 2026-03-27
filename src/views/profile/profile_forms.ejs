@@ -1,12 +1,12 @@
-<div class = "row">
+<div class = "row justify-content-center">
 
     <!-------------------UPDATE STATUS FORM------------------------->
     <% 
     function form_div_class() {
-        return "col-md-6 mb-4 p-3 border rounded";
+        return "col-md-6 mb-4 p-3 mx-1 border rounded";
     }
     %>
-
+    
     <div class="<%= form_div_class() %>">
         <h2>Update Status</h2>
         <form action="/profile" method="POST">
@@ -29,7 +29,7 @@
 
     <div class="<%= form_div_class() %>">
         <h2>Update Password</h2>
-        <form action="/profile" method="POST">
+        <form action="/profile" method="POST" class = "w-50">
             <input type="hidden" name="formType" value="updatePassword">
             
             <div class="mb-2">
@@ -53,7 +53,7 @@
 
 <div class="mb-4 p-3 border rounded">
 <h2>Manage My Games</h2>
-<form action="/profile" method="POST">
+<form action="/profile" method="POST" class = "w-75">
     <input type="hidden" name="formType" value="updateGames">
     
     <div class="mb-3">
