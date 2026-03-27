@@ -1,43 +1,52 @@
 <%- include('../partials/header.ejs', { 
-    title: "Sign In",
+    title: "Sign Up",
     is_connect: false, 
     is_display_buttons: false,
     script : "/form/formSign.js",
     stylesheet_html: '<link rel="stylesheet" href="/css-styles/style.css">'
 }) %>
-<body>
-    <h1 id = "title">Sign Up</h1>
 
-     <form action="<%= action %>/signup" method="post">
-        <div>
-            <label for="username">Username :</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <br>
-        <div>
-            <label for="lastname">Lastname :</label>
-            <input type="text" id="lastname" name="lastname" required>
-        </div>
-        <br>
-        <div>
-            <label for="firstname">Name :</label>
-            <input type="text" id="firstname" name="firstname" required>
-        </div>
-        <br>
-        <div>
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <br>
-        <div>
-            <label for="password">Password :</label>
-            <div class="password-row">
-                <input type="password" id="password" name="password" required>
-                <label for="aff">Show</label>
-                <input id="aff" type="checkbox" name="aff">
+<h1 id="title" class="text-center mb-4">Sign up</h1>
+
+<div class="container">
+
+    <div class="row w-100 justify-content-center mb-4 mt-4">
+
+        <form action="<%= action %>/signup" method="post" 
+                class="col-12 col-md-6 col-lg-4 p-4 border rounded">
+            <div class="mb-2">
+                <label for="username" class="form-label bold">Username :</label>
+                <input type="text" id="username" name="username" class="form-control" required>
             </div>
-        </div>
-        <br>
-        <button type="submit">Register</button>
-    </form>
+            
+            <div class="mb-2">
+                <label for="lastname" class="form-label bold">Lastname :</label>
+                <input type="text" id="lastname" name="lastname" class="form-control" required>
+            </div>
+            
+            <div class="mb-2">
+                <label for="firstname" class="form-label bold">Name :</label>
+                <input type="text" id="firstname" name="firstname" class="form-control" required>
+            </div>
+            
+            <div class="mb-2">
+                <label for="email" class="form-label bold">Email :</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="mb-2">
+                <label for="password" class="form-label bold">Password :</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="mb-2 form-check">
+                <input id="aff" type="checkbox" name="aff" class="form-check-input">
+                <label for="aff" class="form-check-label">Show</label>
+            </div>
+            
+            <button type="submit" class="btn btn-sign mt-2 w-100">Register</button>
+        </form>
+    </div>
+</div>
+
 <%- include('../partials/footer.ejs') %>
