@@ -13,7 +13,7 @@
             <input type="hidden" name="formType" value="updateStatus">
             
             <div class="mb-3">
-                <label for="statusSelect" class="form-label"><strong>Choose your status:</strong></label>
+                <label for="statusSelect" class="form-label bold">Choose your status:</label>
                 <select name="status" id="statusSelect" class="form-select">
                     <option value="online" <%= user.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
                     <option value="busy" <%= user.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
@@ -33,15 +33,15 @@
             <input type="hidden" name="formType" value="updatePassword">
             
             <div class="mb-2">
-                <label><strong>Current Password:</strong></label>
+                <label class="form-label bold">Current Password:</label>
                 <input type="password" name="currentPassword" class="form-control" required>
             </div>
             <div class="mb-2">
-                <label><strong>New Password:</strong></label>
+                <label class="form-label bold">New Password:</label>
                 <input type="password" name="newPassword" class="form-control" required>
             </div>
             <div class="mb-2">
-                <label><strong>Confirm New Password:</strong></label>
+                <label class="form-label bold">Confirm New Password:</label>
                 <input type="password" name="confirmPassword" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-sign mt-3">Update Password</button>
