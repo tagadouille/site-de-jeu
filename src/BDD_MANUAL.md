@@ -23,6 +23,8 @@ Ensure that your database is configured with the following parameters:
 
 > ⚠️ Make sure PostgreSQL is running and the credentials above are correctly set up.
 
+When you're connecting to postgres, import the file *BDD.sql*.
+
 ---
 
 ## Example of a Query Function
