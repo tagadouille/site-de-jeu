@@ -48,10 +48,4 @@ function submit_form() {
         }
         field_count++;
     });
-
-    if(valid_field_count === field_count) {
-        submit.prop("disabled", false);
-        return;
-    }
-    submit.prop("disabled", true);
 }

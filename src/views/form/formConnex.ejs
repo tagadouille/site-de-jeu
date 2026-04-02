@@ -1,29 +1,43 @@
 <%- include('../partials/header.ejs', { 
-    title: "Sign Up",
+    title: "Sign In",
     is_connect: false, 
     is_display_buttons: false,
     script : "/form/formConnex.js",
     stylesheet_html: '<link rel="stylesheet" href="/css-styles/style.css">'
 }) %>
-<body>
-    <h1 id = "title">Sign in</h1>
-    <form action="<%= action %>/signin" method="post">
 
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+<h1 id="title" class="text-center mb-4">Sign in</h1>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+<div class="container">
 
-        <label for="password">Password:</label>
+    <div class="row w-100 justify-content-center mx-auto mb-4 mt-4">
+        
+        <form action="<%= action %>/signin" method="post" 
+              class="col-12 col-md-6 col-lg-4 p-4 border rounded">
 
-        <div class="password-row">
-            <input type="password" id="password" name="password" required>
-            <label for="aff">Show</label>
-            <input id="aff" type="checkbox" name="aff">
-        </div><br>
+            <div class="mb-2">
+                <label for="username" class="form-label bold">Username:</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
 
-        <button type="submit" id = "submit">Sign In</button>
-    </form>
+            <div class="mb-2">
+                <label for="email" class="form-label bold">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+
+            <div class="mb-2">
+                <label for="password" class="form-label bold">Password:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="mb-2 form-check">
+                <input id="aff" type="checkbox" name="aff" class="form-check-input">
+                <label for="aff" class="form-check-label">Show</label>
+            </div>
+            
+            <button type="submit" class="btn btn-sign mt-3 w-100">Sign In</button>
+        </form>
+    </div>
+</div>
 
 <%- include('../partials/footer.ejs') %>
