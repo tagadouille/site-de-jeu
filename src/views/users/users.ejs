@@ -1,0 +1,94 @@
+<%- include('../partials/header.ejs', {
+    title : "Community Users",
+    is_connect : true,
+    is_display_buttons : true,
+    script : "", 
+    stylesheet_html: '<link rel="stylesheet" href="/css-styles/style.css">'
+}) %>
+
+<div class="container mt-4">
+    <h1>Community Users</h1>
+
+    <div class="card p-3 mb-4 bg-light">
+        <form action="/users" method="GET" class="row g-3 align-items-end">
+            
+            <div class="col-md-4">
+                <label class="form-label">Search a user :</label>
+                <input type="text" name="search" class="form-control" value="<%= filters.search %>" placeholder="Username...">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Game :</label>
+                <select name="game" class="form-select">
+                    <option value="all" <%= filters.game === 'all' ? 'selected' : '' %>>All Games</option>
+                    <% games.forEach(game => { %>
+                        <option value="<%= game.id %>" <%= filters.game === game.id ? 'selected' : '' %>><%= game.name %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Status :</label>
+                <select name="status" class="form-select">
+                    <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
+                    <option value="connected" <%= filters.status === 'connected' ? 'selected' : '' %>>All Connected</option>
+                    <option value="online" <%= filters.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
+                    <option value="busy" <%= filters.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
+                    <option value="offline" <%= filters.status === 'offline' ? 'selected' : '' %>>⚫ Offline</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <% if (users.length > 0) { %>
+            <% users.forEach(user => { %>
+                <div class="col-md-6 mb-3">
+                    <div class="card p-3 h-100 border-<%= user.isConnected ? 'success' : 'secondary' %>">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="m-0"><%= user.username %></h4>
+                            <span>
+                                <% if (user.status === 'online') { %> 🟢 Online
+                                <% } else if (user.status === 'busy') { %> 🔴 Busy
+                                <% } else { %> ⚫ Offline <% } %>
+                            </span>
+                        </div>
+
+                        <% if (user.playingGame && user.playingWith) { %>
+                            <div class="alert alert-warning py-1 px-2 mb-2" role="alert">
+                                ⚔️ Playing currently <strong><%= user.playingGame %></strong> against <strong><%= user.playingWith %></strong>
+                            </div>
+                        <% } %>
+
+                        <hr>
+                        <h5>Accepted Games :</h5>
+                        <% if (user.acceptedGames.length > 0) { %>
+                            <ul class="list-group list-group-flush">
+                                <% user.acceptedGames.forEach(game => { %>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <%= game.name %>
+                                        <span class="badge bg-secondary rounded-pill">
+                                            <%= game.won %> V / <%= game.played %> Played
+                                        </span>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        <% } else { %>
+                            <p class="text-muted">No games selected.</p>
+                        <% } %>
+
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="alert alert-info">No users match your filters.</div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>

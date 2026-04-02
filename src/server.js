@@ -1,10 +1,12 @@
 /*------------------------IMPORT-----------------------*/
 import express from "express";
+import pg from "pg";
+
 import { runConnex } from "./formProcess/connex.js";
 import { runSign } from "./formProcess/sign.js";
 import { runProfile } from "./profile/profile.js";
 import { runIndex } from "./indexManager.js";
-import pg from "pg";
+import { runUsers } from "./users/users.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const app = express();
@@ -59,6 +61,7 @@ app.post("/", (req, res) => {
 runConnex(app_obj);
 runSign(app_obj);
 runProfile(app_obj);
+runUsers(app_obj);
 
 /*------------------------LISTEN-----------------------*/
 app.listen(PORT, () => {

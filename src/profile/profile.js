@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 /**
  * Backend for the profile page
  * @param {*} server
@@ -8,12 +10,27 @@ export function runProfile(server) {
     let app = server.app;
     let baseUrl = server.action;
 
+    function hashPassword(password) {
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+        return `${salt}:${hash}`;
+    }
+
+    function verifyPassword(passwordAttempt, storedPassword) {
+        const [salt, originalHash] = storedPassword.split(':');
+        const attemptHash = crypto.scryptSync(passwordAttempt, salt, 64).toString('hex');
+        return attemptHash === originalHash;
+    }
+
+    const defaultPasswordHash = hashPassword("admin123");
+
     const dummyUser = {
         username: "user123",
         email: "user123@example.com",
         firstname: "user",
         lastname: "123",
-        status : "online"
+        status : "online",
+        passwordHash: defaultPasswordHash
     };
 
     const allAvailableGames = [
@@ -28,10 +45,10 @@ export function runProfile(server) {
             { id: "g" + (index + 5), name: "Game " + (index + 5), image: "/favicon.ico", description: "Description of Game " + (index + 5) + "." }
         );
     }
-
-    
     let dummyGames = [ allAvailableGames[0], allAvailableGames[1] ];
+
     app.get('/profile', (req, res) => {
+        
 
         res.render("profile/profile.ejs", { 
             action: baseUrl, 
@@ -50,11 +67,28 @@ export function runProfile(server) {
             const currentPassword = req.body.currentPassword;
             const newPassword = req.body.newPassword;
             const confirmPassword = req.body.confirmPassword;
-            console.log("Demande de changement de mot de passe !");
+            console.log("Received password update request:", { currentPassword, newPassword, confirmPassword });
+            
+            if (newPassword !== confirmPassword) {
+                console.log("Error: The new passwords do not match.");
+                return res.redirect('/profile'); 
+            }
+
+            const isMatch = verifyPassword(currentPassword, dummyUser.passwordHash);
+            
+            if (!isMatch) {
+                console.log("Error: The current password is incorrect.");
+                return res.redirect('/profile');
+            }
+
+            const newHash = hashPassword(newPassword);
+
+            dummyUser.passwordHash = newHash;
+            console.log("Success: Password updated and hashed!");
         }
         else if (formType === 'updateStatus') {
             dummyUser.status = req.body.status;
-            console.log("Nouveau statut mis à jour :", dummyUser.status);
+            console.log("Success: Status updated:", dummyUser.status);
         } 
         else if (formType === 'updateGames') {
             let selected = req.body.selectedGames;
@@ -66,7 +100,7 @@ export function runProfile(server) {
             }
             
             dummyGames = allAvailableGames.filter(game => selected.includes(game.id));
-            console.log("Liste des jeux mise à jour.");
+            console.log("Success: Game list updated.");
         }
 
         res.redirect('/profile');
