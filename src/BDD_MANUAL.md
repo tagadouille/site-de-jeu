@@ -59,3 +59,11 @@ operations()
     .then(result => console.log(result))
     .catch(err => console.error('Error executing operations:', err));
 ```
+
+# Get the pool from another file : 
+
+The pool is in the app_obj of *server.js*, the object that is passed to the runs method.
+
+```javascript
+const app_obj = { app: app, action: PATH, pool: pool };
+```
