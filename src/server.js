@@ -27,30 +27,9 @@ const pool = new pg.Pool({
     port: 5432
 });
 
-
-async function operations() {
-    const client = await pool.connect();
-    // attente du résultat de la requête :
-    let res = await client.query("SELECT * FROM rendezvous");
-    // chaque nom de colonne correspond à un nom de propriété de row :
-    for (row of res.rows) {
-        console.log(row.date);
-        console.log(row.heure);
-        console.log(row.lieu);
-    }
-    // ...
-    // libération du client :
-    client.release();
-    // retour facultatif d'un résultat :
-    return res.rows;
-};
-operations()
-    .then(resultat => { console.log(resultat) })
-    .catch(err => console.err(err.stack)); // si une erreur se produit.
-
 /*------------------------ROUTES-----------------------*/
 
-const app_obj = { app: app, action: PATH };
+const app_obj = { app: app, action: PATH, pool: pool };
 
 runIndex(app_obj);
 
