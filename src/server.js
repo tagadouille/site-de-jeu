@@ -7,6 +7,7 @@ import { runSign } from "./formProcess/sign.js";
 import { runProfile } from "./profile/profile.js";
 import { runIndex } from "./indexManager.js";
 import { runUsers } from "./users/users.js";
+import { hashPassword } from "./formProcess/hash.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const app = express();
@@ -26,6 +27,8 @@ const pool = new pg.Pool({
     password: 'P@risCite2026', //TODO : le chercher dans un fichier
     port: 5432
 });
+
+console.log(await hashPassword("12345678")); //TODO : à supprimer, juste pour tester le hashage
 
 /*------------------------ROUTES-----------------------*/
 
