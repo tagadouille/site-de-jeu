@@ -1,6 +1,5 @@
 import { verifyPassword } from "./hash.js";
-
-import DOMpurify from "dompurify";
+import { sanitizeText } from "./sanitize.js";
 
 /**
  * Backend for the connexion page
@@ -17,8 +16,8 @@ export function runConnex(server) {
     });
 
     app.post('/signin', async (req, res) => {
-        const username = DOMpurify.sanitize(req.body.username ? req.body.username.trim().toLowerCase() : '');
-        const password = DOMpurify.sanitize(req.body.password ? req.body.password.trim() : '');
+        const username = sanitizeText(req.body.username).toLowerCase();
+        const password = sanitizeText(req.body.password);
 
         if (!username || !password) {
             console.log("Error: Missing username or password");

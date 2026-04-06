@@ -1,6 +1,5 @@
 import { hashPassword } from './hash.js';
-
-import DOMpurify from "dompurify";
+import { verifyField, sanitizeText } from './sanitize.js';
 
 /**
  
@@ -18,20 +17,21 @@ export function runSign(server) {
 
     app.post('/signup', async (req, res) => {
 
-        const username = DOMpurify.sanitize(req.body.username ? req.body.username.trim() : '');
-        const email = DOMpurify.sanitize(req.body.email ? req.body.email.trim().toLowerCase() : '');
-        const password = DOMpurify.sanitize(req.body.password ? req.body.password.trim() : '');
-        const lastname = DOMpurify.sanitize(req.body.lastname ? req.body.lastname.trim() : '');
-        const firstname = DOMpurify.sanitize(req.body.firstname ? req.body.firstname.trim() : '');
+        const username = sanitizeText(req.body.username);
+        const email = sanitizeText(req.body.email).toLowerCase();
+        const password = sanitizeText(req.body.password);
+        const lastname = sanitizeText(req.body.lastname);
+        const firstname = sanitizeText(req.body.firstname);
 
         if (!username || !email || !password) {
             console.log("Error: Missing username, email, or password");
             return res.status(400).send(" Username, email, and password are required.");
         }
 
-        verifyField(username);
-        verifyField(lastname);
-        verifyField(firstname);
+        if (!verifyField(username) || !verifyField(lastname) || !verifyField(firstname)) {
+            console.log("Error: Invalid username/firstname/lastname format");
+            return res.status(400).send("Username, firstname and lastname must contain only letters, numbers, _ or -, and be 3 to 20 characters long.");
+        }
 
 
         if (password.length < 8) {
@@ -66,19 +66,6 @@ export function runSign(server) {
             return res.status(500).send("An error occurred while creating the account. Please try again later.");
         }
     });
-}
-
-/**
- * This function verifies if the text contains only letters, numbers, 
- * underscores and hyphens, and if it is between 3 and 20 characters long
- * @param {*} text the text to verify
- * @returns a 400 error if the text contains invalid characters, otherwise it returns nothing
- */
-function verifyField(text) {
-
-    if (!/^[a-zA-Z0-9_-]{3,20}$/.test(test)) {
-        return res.status(400).send(`The ${text} contains invalide characters.`);
-    }
 }
 
 /**
