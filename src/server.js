@@ -1,5 +1,7 @@
 /*------------------------IMPORT-----------------------*/
 import express from "express";
+import session from "express-session";
+
 import { runConnex } from "./formProcess/connex.js";
 import { runSign } from "./formProcess/sign.js";
 import { runProfile } from "./profile/profile.js";
@@ -14,6 +16,17 @@ const PATH = "http://localhost:" + PORT;
 app.set("view engine", "ejs");
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+    secret: 'mon_secret_super_secure', // TODO MDP
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60, // 1 hours
+        httpOnly: true,
+        secure: false // true in HTTPS
+    }
+}));
 
 /*------------------------ROUTES-----------------------*/
 
