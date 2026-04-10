@@ -1,0 +1,20 @@
+<%- include('../partials/header.ejs', {
+    title : "Log Out",
+    is_connect : false,
+    is_display_buttons : false,
+    script : "", 
+    stylesheet_html: '<link rel="stylesheet" href="/css-styles/style.css">'
+}) %>
+
+<div class="container">
+    <div class="row w-100 justify-content-center mx-auto mb-4 mt-4">
+            <h1>Are you sure that you want to log out ?</h1>
+            <form method="post" class = "col-12 col-md-6 col-lg-4 p-4 border rounded">
+                <button type="submit" class = "btn btn-sign mt-2 w-100">Log Out</button>
+                <a href="/" class = "btn btn-sign mt-2 w-100">Cancel</a>
+            </form>
+    </div>
+</div>
+</div>
+
+<%- include('../partials/footer.ejs') %>

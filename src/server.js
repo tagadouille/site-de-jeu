@@ -10,6 +10,7 @@ import { runSign } from "./formProcess/sign.js";
 import { runProfile } from "./profile/profile.js";
 import { runIndex } from "./indexManager.js";
 import { runUsers } from "./users/users.js";
+import { runLogOut } from "./users/log_out.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 const __filename = fileURLToPath(import.meta.url);
@@ -61,6 +62,7 @@ runConnex(app_obj);
 runSign(app_obj);
 runProfile(app_obj);
 runUsers(app_obj);
+runLogOut(app_obj);
 
 /*------------------------LISTEN-----------------------*/
 const httpServer = app.listen(PORT, () => {

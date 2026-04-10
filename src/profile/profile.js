@@ -14,7 +14,7 @@ export function runProfile(server) {
     app.get('/profile', async(req, res) => {
 
         if(!req.session.user) {
-            res.redirect('/');
+            return res.redirect('/signin');
         }
 
         let client;
