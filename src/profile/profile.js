@@ -13,7 +13,7 @@ export function runProfile(server) {
 
     app.get('/profile', async(req, res) => {
 
-        if(!req.session.user) {
+        if (!req.session || !req.session.user) {
             return res.redirect('/signin');
         }
 
@@ -75,6 +75,10 @@ export function runProfile(server) {
     });
 
     app.post('/profile', async (req, res) => {
+
+        if (!req.session || !req.session.user) {
+            return res.redirect('/signin');
+        }
 
        const formType = req.body.formType;
 

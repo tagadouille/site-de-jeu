@@ -79,10 +79,17 @@ export function runUsers(server) {
             }
         }
 
+        let is_connected = false;
+
+        if(req.session.user) {
+            is_connected = true;
+        }
+
         //On envoie les données filtrées à la vue
         res.render("users/users.ejs", { 
             users: filteredUsers,
             games: allGames,
+            is_connect: is_connected,
             filters: { search: searchQuery, game: gameQuery, status: statusQuery }
         });
 
