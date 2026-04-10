@@ -5,53 +5,53 @@
 export function runUsers(server) {
     let app = server.app;
 
-    //Fausse BDD pour les utilisateurs et les jeux
-    const allGames = [
-        { id: "g1", name: "Game 1" },
-        { id: "g2", name: "Game 2" },
-        { id: "g3", name: "Game 3" }
-    ];
+    
 
-    const allUsers = [
-        {
-            username: "user123",
-            isConnected: true,
-            status: "online", 
-            playingGame: null,
-            playingWith: null,
-            acceptedGames: [
-                { id: "g1", name: "Game 1", played: 10, won: 5 },
-                { id: "g2", name: "Game 2", played: 3, won: 1 }
-            ]
-        },
-        {
-            username: "test1",
-            isConnected: true,
-            status: "busy", // Occupé car en train de jouer
-            playingGame: "Game 1",
-            playingWith: "test2",
-            acceptedGames: [
-                { id: "g1", name: "Game 1", played: 50, won: 30 }
-            ]
-        },
-        {
-            username: "test2",
-            isConnected: true,
-            status: "busy", 
-            playingGame: "Game 1",
-            playingWith: "test1",
-            acceptedGames: [
-                { id: "g1", name: "Game 1", played: 100, won: 80 },
-                { id: "g3", name: "Game 3", played: 12, won: 10 }
-            ]
-        }
-    ];
-
-    app.get('/users', (req, res) => {
+    app.get('/users', async (req, res) => {
         //Récupération des filtres depuis l'URL
         const searchQuery = req.query.search || "";
         const gameQuery = req.query.game || "all";
         const statusQuery = req.query.status || "all";
+
+        let client;
+        try {
+            client = await server.pool.connect();
+
+            const gamesRes = await client.query("SELECT name FROM games");
+            const usersRes = await client.query("SELECT id, username, is_connected, is_occupied FROM users");
+            const playedGamesRes = await client.query("SELECT user_id, game_name, number_of_matches, number_of_wins FROM played_games");
+
+         
+            const allGames = gamesRes.rows.map(g => ({ 
+                id: g.name, 
+                name: g.name 
+            }));
+
+            const allUsers = usersRes.rows.map(dbUser => {
+                
+                let currentStatus = "offline";
+                if (dbUser.is_connected) {
+                    currentStatus = dbUser.is_occupied ? "busy" : "online";
+                }
+
+                const userStats = playedGamesRes.rows.filter(pg => pg.user_id === dbUser.id);
+                
+                const acceptedGames = userStats.map(stat => ({
+                    id: stat.game_name,
+                    name: stat.game_name,
+                    played: stat.number_of_matches,
+                    won: stat.number_of_wins
+                }));
+
+                return {
+                    username: dbUser.username,
+                    isConnected: dbUser.is_connected,
+                    status: currentStatus,
+                    playingGame: null,
+                    playingWith: null, 
+                    acceptedGames: acceptedGames
+                };
+            });
 
         // Filtrage
         let filteredUsers = allUsers;
@@ -85,5 +85,14 @@ export function runUsers(server) {
             games: allGames,
             filters: { search: searchQuery, game: gameQuery, status: statusQuery }
         });
+
+        } catch (err) {
+            console.error('Error retrieving users:', err);
+            res.status(500).send("Error retrieving users. Please try again later.");
+        } finally {
+            if (client) {
+                client.release(); 
+            }
+        }
     });
 }

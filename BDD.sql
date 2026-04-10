@@ -12,7 +12,7 @@ CREATE TABLE users (
   firstname VARCHAR(255) NOT NULL,
   lastname VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
+  password TEXT NOT NULL,
   is_occupied BOOLEAN NOT NULL,
   is_connected BOOLEAN NOT NULL
 );
@@ -44,8 +44,8 @@ CREATE TABLE played_games (
 
 /*-----------INSERTIONS---------------*/
 INSERT INTO users (username, firstname, lastname, email, password, is_occupied, is_connected) VALUES
-  ('john_doe', 'John', 'Doe', 'john@mail.com', 'password123', false, false),
-  ('jane_smith', 'Jane', 'Smith', 'jane@mail.com', 'password456', true, false);
+  ('john_doe', 'John', 'Doe', 'john@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$oOw9pHuBlRPQv73jNKlsiw$dQ5QEKSyI+ESwEQafKQlGSOhyaVpO/JBkvqjJAZ1QaQ', false, false),
+  ('jane_smith', 'Jane', 'Smith', 'jane@mail.com', '$argon2id$v=19$m=65536,t=3,p=4$oOw9pHuBlRPQv73jNKlsiw$dQ5QEKSyI+ESwEQafKQlGSOhyaVpO/JBkvqjJAZ1QaQ', true, false);
 
 
 INSERT INTO games (name, description) VALUES
