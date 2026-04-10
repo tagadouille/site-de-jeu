@@ -13,6 +13,10 @@ export function runProfile(server) {
 
     app.get('/profile', async(req, res) => {
 
+        if(!req.session.user) {
+            res.redirect('/');
+        }
+
         let client;
         let allGames = [];
         let favGames = [];
@@ -20,10 +24,8 @@ export function runProfile(server) {
         try {
             client = await server.pool.connect();
 
-            // CTDO : faudra changer quand yaura les cookies 
-            const currentUsername = "john_doe"; 
+            const currentUsername = req.session.user.username;
             
-
             const dbUser = await get_user_by_username(server.pool, currentUsername);
             
             if (!dbUser) {
@@ -79,8 +81,8 @@ export function runProfile(server) {
        let client;
         try {
             client = await server.pool.connect();
-            //todo : pareil que get 
-            const currentUsername = "john_doe"; 
+
+            const currentUsername = req.session.user.username; 
             
             const userRes = await client.query("SELECT id, password FROM users WHERE username = $1", [currentUsername]);
             if (userRes.rows.length === 0) return res.redirect('/signin');

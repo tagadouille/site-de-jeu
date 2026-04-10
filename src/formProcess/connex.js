@@ -24,6 +24,7 @@ export function runConnex(server) {
             return res.status(400).send("Username and password are required.");
         }
 
+        // Get the user account from the database
         try {
             const user = await get_account(server.pool, username);
 
@@ -38,6 +39,10 @@ export function runConnex(server) {
             }
 
             console.log(`User ${user.username} logged in successfully!`);
+
+            // Set the user session
+            req.session.user = { username: user.username };
+
             res.redirect('/profile');
         }
         catch (err) {
