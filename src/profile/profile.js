@@ -11,27 +11,24 @@ export function runProfile(server) {
     let baseUrl = server.action;
 
 
-    app.get('/profile', async(req, res) => {
+    app.get('/profile', async (req, res) => {
 
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
         }
 
-        let client;
         let allGames = [];
         let favGames = [];
         let currentStatus = "offline";
         try {
-            client = await server.pool.connect();
-
             const currentUsername = req.session.user.username;
-            
+
             const dbUser = await get_user_by_username(server.pool, currentUsername);
-            
+
             if (!dbUser) {
                 return res.redirect('/signin');
             }
-            
+
             if (dbUser.is_connected) {
                 currentStatus = dbUser.is_occupied ? "busy" : "online";
             }
@@ -59,8 +56,8 @@ export function runProfile(server) {
                 image: "/game-images/" + game.name.toLowerCase().replace(/\s+/g, '_') + ".jpg"
             }));
 
-            res.render("profile/profile.ejs", { 
-                action: baseUrl, 
+            res.render("profile/profile.ejs", {
+                action: baseUrl,
                 user: formattedUser,
                 games: favGames,
                 allGames: allGames
@@ -69,8 +66,6 @@ export function runProfile(server) {
         } catch (err) {
             console.error("Erreur BDD (GET /profile) :", err);
             res.status(500).send("Erreur serveur.");
-        } finally {
-            if (client) client.release();
         }
     });
 
@@ -80,72 +75,35 @@ export function runProfile(server) {
             return res.redirect('/signin');
         }
 
-       const formType = req.body.formType;
+        const formType = req.body.formType;
 
-       let client;
+        let client;
         try {
             client = await server.pool.connect();
 
-            const currentUsername = req.session.user.username; 
-            
+            const currentUsername = req.session.user.username;
+
             const userRes = await client.query("SELECT id, password FROM users WHERE username = $1", [currentUsername]);
             if (userRes.rows.length === 0) return res.redirect('/signin');
-            
+
             const userId = userRes.rows[0].id;
             const storedPassword = userRes.rows[0].password;
 
-        if (formType === 'updatePassword') {
-            const currentPassword = req.body.currentPassword;
-            const newPassword = req.body.newPassword;
-            const confirmPassword = req.body.confirmPassword;
-            console.log("Received password update request:", { currentPassword, newPassword, confirmPassword });
-            
-            if (newPassword !== confirmPassword) {
-                console.log("Error: The new passwords do not match.");
-                return res.redirect('/profile'); 
+            if (formType === 'updatePassword') {
+                await update_password(client, userId, storedPassword, req, res);
+            }
+            else if (formType === 'updateStatus') {
+                const newStatus = req.body.status;
+                const isOccupied = (newStatus === 'busy');
+
+                await client.query("UPDATE users SET is_occupied = $1 WHERE id = $2", [isOccupied, userId]);
+                console.log("Success: Status updated in DB:", newStatus);
+            }
+            else if (formType === 'updateGames') {
+                await update_fav_games(userId, req);
             }
 
-            const isMatch = await verifyPassword(currentPassword, storedPassword);
-            
-            if (!isMatch) {
-                console.log("Error: The current password is incorrect.");
-                return res.redirect('/profile');
-            }
-
-            const newHash = await hashPassword(newPassword);
-
-            await client.query("UPDATE users SET password = $1 WHERE id = $2", [newHash, userId]);
-            console.log("Success: Password updated and hashed in DB with Argon2!");
-        }
-        else if (formType === 'updateStatus') {
-            const newStatus = req.body.status;
-            const isOccupied = (newStatus === 'busy');
-
-            await client.query("UPDATE users SET is_occupied = $1 WHERE id = $2", [isOccupied, userId]);
-            console.log("Success: Status updated in DB:", newStatus);
-        } 
-        else if (formType === 'updateGames') {
-            let selected = req.body.selectedGames;
-            if (!selected) {
-                selected = []; 
-            } 
-            else if (!Array.isArray(selected)) {
-                selected = [selected]; 
-            }
-            
-            await client.query("BEGIN"); 
-                
-            await client.query("DELETE FROM fav_games WHERE user_id = $1", [userId]);
-                
-            for (const gameName of selected) {
-                await client.query("INSERT INTO fav_games (user_id, game_name) VALUES ($1, $2)", [userId, gameName]);
-            }
-                
-            await client.query("COMMIT"); 
-            console.log("Success: Game list updated.");
-        }
-
-        res.redirect('/profile');
+            res.redirect('/profile');
         } catch (err) {
             if (client) await client.query("ROLLBACK");
             console.error("Error BDD (POST /profile) :", err);
@@ -196,7 +154,6 @@ async function get_all_games(pool) {
 
 /**
  * The function to get the favorite games of a specific user
- * @param {*} pool the pool to connect to the database
  * @param {number} userId the id of the user
  * @returns the list of favorite games
  */
@@ -211,4 +168,66 @@ async function get_fav_games(pool, userId) {
     } finally {
         client.release();
     }
+}
+
+/**
+ * Function to update the favorite games of a user in the database
+ * @param {*} userId 
+ * @param {*} req 
+ */
+async function update_fav_games(userId, req) {
+    let selected = req.body.selectedGames;
+    if (!selected) {
+        selected = [];
+    }
+    else if (!Array.isArray(selected)) {
+        selected = [selected];
+    }
+
+    await client.query("BEGIN");
+
+    await client.query("DELETE FROM fav_games WHERE user_id = $1", [userId]);
+
+    for (const gameName of selected) {
+        await client.query("INSERT INTO fav_games (user_id, game_name) VALUES ($1, $2)", [userId, gameName]);
+    }
+
+    await client.query("COMMIT");
+    console.log("Success: Game list updated.");
+}
+
+/**
+ * Update the user's password in the database after verifying the current 
+ * password and hashing the new one
+ * @param {*} client the database client to use for queries
+ * @param {*} userId the id of the user to update
+ * @param {*} storedPassword the current hashed password stored in the database
+ * @param {*} req the request object containing the form data
+ * @param {*} res the response object to send redirects in case of errors or success
+ * @returns 
+ */
+async function update_password(client, userId, storedPassword, req, res) {
+
+    const currentPassword = req.body.currentPassword;
+    const newPassword = req.body.newPassword;
+    const confirmPassword = req.body.confirmPassword;
+
+    console.log("Received password update request:", { currentPassword, newPassword, confirmPassword });
+
+    if (newPassword !== confirmPassword) {
+        console.log("Error: The new passwords do not match.");
+        return res.redirect('/profile');
+    }
+
+    const isMatch = await verifyPassword(currentPassword, storedPassword);
+
+    if (!isMatch) {
+        console.log("Error: The current password is incorrect.");
+        return res.redirect('/profile');
+    }
+
+    const newHash = await hashPassword(newPassword);
+
+    await client.query("UPDATE users SET password = $1 WHERE id = $2", [newHash, userId]);
+    console.log("Success: Password updated and hashed in DB with Argon2!");
 }
