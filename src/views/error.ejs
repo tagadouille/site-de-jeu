@@ -1,0 +1,18 @@
+<%- include(
+    'partials/header',
+    {
+        title : "Error 404 - Page Not Found",
+        is_connect : false,
+        is_display_buttons : false,
+        script : "",
+        stylesheet_html: 
+        '<link rel="stylesheet" href="/css-styles/index.css">' +
+        '<link rel="stylesheet" href="/css-styles/style.css">'
+    }
+    ) %>
+<div class="container">
+    <h1 class="mt-5">Error</h1>
+    <p class="lead"><%= message %></p>
+    <a href="/" class="btn btn-primary">Go Back Home</a>
+</div>
+<%- include('partials/footer') %>

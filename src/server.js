@@ -12,6 +12,7 @@ import { runProfile } from "./profile/profile.js";
 import { runIndex } from "./indexManager.js";
 import { runUsers } from "./users/users.js";
 import { runLogOut } from "./users/log_out.js";
+import { runError } from "./error.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 
@@ -40,7 +41,6 @@ const pool = new pg.Pool({
 });
 
 /*-----------------------SESSION CONFIG------------------------------*/
-console.log('SECRET =', process.env.SECRET_SESSION_KEY);
 
 app.use(session({
     secret: process.env.SECRET_SESSION_KEY,
@@ -68,6 +68,13 @@ runSign(app_obj);
 runProfile(app_obj);
 runUsers(app_obj);
 runLogOut(app_obj);
+
+// Handle 404
+app.use(function(req, res, next) {
+    res.status(404).render("error.ejs", { message:  "Page not found" } );
+});
+
+runError(app_obj);
 
 /*------------------------LISTEN-----------------------*/
 const httpServer = app.listen(PORT, () => {
