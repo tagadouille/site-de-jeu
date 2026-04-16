@@ -1,16 +1,21 @@
 /*------------------------IMPORT-----------------------*/
 import express from "express";
+import session from "express-session";
 import pg from "pg";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from 'dotenv';
 
 import { runConnex } from "./formProcess/connex.js";
 import { runSign } from "./formProcess/sign.js";
 import { runProfile } from "./profile/profile.js";
 import { runIndex } from "./indexManager.js";
 import { runUsers } from "./users/users.js";
+import { runLogOut } from "./users/log_out.js";
+import { runError } from "./error.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -23,15 +28,30 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
+dotenv.config({ path: path.join(__dirname, '../config.env') });
+
 /*------------------------DATABASE CONFIG---------------------*/
 
 const pool = new pg.Pool({
     user: 'site_admin',
     host: 'localhost',
     database: 'site_bdd',
-    password: 'P@risCite2026', //TODO : le chercher dans un fichier
+    password: process.env.DB_PASSWORD,
     port: 5432
 });
+
+/*-----------------------SESSION CONFIG------------------------------*/
+
+app.use(session({
+    secret: process.env.SECRET_SESSION_KEY,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 4 * (1000 * 60 * 60), // 4 hours
+        httpOnly: true,
+        secure: false // true in HTTPS
+    }
+}));
 
 /*------------------------ROUTES-----------------------*/
 
@@ -47,6 +67,14 @@ runConnex(app_obj);
 runSign(app_obj);
 runProfile(app_obj);
 runUsers(app_obj);
+runLogOut(app_obj);
+
+// Handle 404
+app.use(function(req, res, next) {
+    res.status(404).render("error.ejs", { message:  "Page not found" } );
+});
+
+runError(app_obj);
 
 /*------------------------LISTEN-----------------------*/
 const httpServer = app.listen(PORT, () => {

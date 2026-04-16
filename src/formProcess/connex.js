@@ -12,10 +12,19 @@ export function runConnex(server) {
     let baseUrl = server.action;
 
     app.get('/signin', (req, res) => {
+
+        if(req.session && req.session.user) {
+            return res.redirect('/profile');
+        }
         res.render("Form/formConnex.ejs", { action: baseUrl });
     });
 
     app.post('/signin', async (req, res) => {
+
+        if(req.session && req.session.user) {
+            return res.redirect('/profile');
+        }
+
         const username = sanitizeText(req.body.username).toLowerCase();
         const password = sanitizeText(req.body.password);
 
@@ -24,6 +33,7 @@ export function runConnex(server) {
             return res.status(400).send("Username and password are required.");
         }
 
+        // Get the user account from the database
         try {
             const user = await get_account(server.pool, username);
 
@@ -32,12 +42,18 @@ export function runConnex(server) {
                 return res.status(401).send("Username or password is incorrect.");
             }
 
+            await set_online(server.pool, username);
+
             if (!(await verifyPassword(password, user.password))) {
                 console.log("Error: Incorrect password");
                 return res.status(401).send("Username or password is incorrect.");
             }
 
             console.log(`User ${user.username} logged in successfully!`);
+
+            // Set the user session
+            req.session.user = { username: user.username };
+
             res.redirect('/profile');
         }
         catch (err) {
@@ -65,6 +81,31 @@ async function get_account(pool, username) {
         );
 
         return res.rows[0] ?? null;
+
+    } catch (err) {
+        console.error('Database error:', err.stack);
+        throw err;
+
+    } finally {
+        client.release();
+    }
+}
+
+/**
+ * Set the user as online
+ * @param {*} pool the pool to connect to the database
+ * @param {*} username the username of the account to retrieve
+ */
+async function set_online(pool, username) {
+
+    const client = await pool.connect();
+
+    try {
+        // Execute the query
+        const res = await client.query(
+            "UPDATE users SET is_connected = true WHERE username = $1",
+            [username]
+        );
 
     } catch (err) {
         console.error('Database error:', err.stack);
