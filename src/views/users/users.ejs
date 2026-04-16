@@ -80,6 +80,18 @@
                         <% } else { %>
                             <p class="text-muted">No games selected.</p>
                         <% } %>
+                        <h6>Favorite Games :</h6>
+                        <% if (user.favorite_games.length > 0) { %>
+                            <ul class="list-group list-group-flush">
+                                <% user.favorite_games.forEach(game => { %>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <%= game %>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        <% } else { %>
+                            <p class="text-muted">No games selected.</p>
+                        <% } %>
 
                     </div>
                 </div>
