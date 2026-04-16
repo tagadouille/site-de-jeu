@@ -100,7 +100,7 @@ export function runProfile(server) {
                 console.log("Success: Status updated in DB:", newStatus);
             }
             else if (formType === 'updateGames') {
-                await update_fav_games(userId, req);
+                await update_fav_games(client,userId, req);
             }
 
             res.redirect('/profile');
@@ -172,10 +172,11 @@ async function get_fav_games(pool, userId) {
 
 /**
  * Function to update the favorite games of a user in the database
+ * @param {*} client
  * @param {*} userId 
  * @param {*} req 
  */
-async function update_fav_games(userId, req) {
+async function update_fav_games(client, userId, req) {
     let selected = req.body.selectedGames;
     if (!selected) {
         selected = [];
