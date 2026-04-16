@@ -28,9 +28,15 @@ export function runIndex(app) {
         finally {
             const response = hasDatabaseError ? res.status(500) : res;
 
+            let is_connect = false;
+
+            if(req.session.user) {
+                is_connect = true;
+            }
+
             response.render("index.ejs", {
                 games: games,
-                is_connect: false, //TODO SESSION
+                is_connect: is_connect,
                 is_display_buttons: true //TODO SESSION
             });
         }

@@ -77,11 +77,14 @@
 
                     if(is_display_buttons) {
 
+                        let button_class = "nav-link btn btn-sign mx-1 my-1";
+
                         if(is_connect) { %>
-                                <a href="/profile" class="nav-link btn btn-sign mx-1 my-1">Profile</a>
+                                <a href="/profile" class= "<%= button_class%>" >Profile</a>
+                                <a href="/logout" class= "<%= button_class%>">Log out</a>
                             <% } else { %>
-                                <a href="/signin" class="nav-link btn btn-sign mx-1 my-1">Sign in</a>
-                                <a href="/signup" class="nav-link btn btn-sign mx-1 my-1">Sign up</a>
+                                <a href="/signin" class= "<%= button_class%>">Sign in</a>
+                                <a href="/signup" class= "<%= button_class%>">Sign up</a>
                         <% }
                     }
                 } 

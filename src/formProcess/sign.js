@@ -12,10 +12,18 @@ export function runSign(server) {
     let baseUrl = server.action;
 
     app.get('/signup', (req, res) => {
+
+        if(req.session && req.session.user) {
+            return res.redirect('/profile');
+        }
         res.render("Form/formSign.ejs", { action: baseUrl });
     });
 
     app.post('/signup', async (req, res) => {
+
+        if(req.session && req.session.user) {
+            return res.redirect('/profile');
+        }
 
         const username = sanitizeText(req.body.username);
         const email = sanitizeText(req.body.email).toLowerCase();

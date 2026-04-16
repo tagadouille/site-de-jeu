@@ -20,6 +20,7 @@ export function runUsers(server) {
             const gamesRes = await client.query("SELECT name FROM games");
             const usersRes = await client.query("SELECT id, username, is_connected, is_occupied FROM users");
             const playedGamesRes = await client.query("SELECT user_id, game_name, number_of_matches, number_of_wins FROM played_games");
+            const favGamesRes = await client.query("SELECT user_id, game_name FROM fav_games");
 
          
             const allGames = gamesRes.rows.map(g => ({ 
@@ -43,13 +44,17 @@ export function runUsers(server) {
                     won: stat.number_of_wins
                 }));
 
+                const userFavs = favGamesRes.rows.filter(fg => fg.user_id === dbUser.id);
+                const favoriteGames = userFavs.map(fav => fav.game_name);
+
                 return {
                     username: dbUser.username,
                     isConnected: dbUser.is_connected,
                     status: currentStatus,
                     playingGame: null,
                     playingWith: null, 
-                    acceptedGames: acceptedGames
+                    acceptedGames: acceptedGames,
+                    favorite_games: favoriteGames
                 };
             });
 
@@ -79,10 +84,17 @@ export function runUsers(server) {
             }
         }
 
+        let is_connected = false;
+
+        if(req.session.user) {
+            is_connected = true;
+        }
+
         //On envoie les données filtrées à la vue
         res.render("users/users.ejs", { 
             users: filteredUsers,
             games: allGames,
+            is_connect: is_connected,
             filters: { search: searchQuery, game: gameQuery, status: statusQuery }
         });
 
