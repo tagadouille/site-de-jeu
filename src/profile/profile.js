@@ -19,7 +19,9 @@ export function runProfile(server) {
 
         let allGames = [];
         let favGames = [];
-        let currentStatus = "offline";
+
+        let currentStatus = "online";
+
         try {
             const currentUsername = req.session.user.username;
 
@@ -28,7 +30,7 @@ export function runProfile(server) {
             if (!dbUser) {
                 return res.redirect('/signin');
             }
-
+            
             if (dbUser.is_connected) {
                 currentStatus = dbUser.is_occupied ? "busy" : "online";
             }
@@ -42,6 +44,7 @@ export function runProfile(server) {
             };
 
             const dbAllGames = await get_all_games(server.pool);
+            console.log(dbAllGames);
             allGames = (Array.isArray(dbAllGames) ? dbAllGames : []).map((game) => ({
                 id: game.name,
                 name: game.name,
