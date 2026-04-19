@@ -35,9 +35,9 @@
 
         <div id = "game-list-wrapper" class = "container-fluid py-2">
             <ul id = "game-list" class = "overflow-auto list-unstyled">
-                <% if (allGames && allGames.length > 0) { %>
+                <% if (games && games.length > 0) { %>
 
-                    <% allGames.forEach(game => { %>
+                    <% games.forEach(game => { %>
                         <li class = "game-item my-1 px-4 py-2 border rounded">
                             <div class = "mb-3">
                                 <strong><%= game.name %></strong>

@@ -44,18 +44,17 @@ export function runProfile(server) {
             };
 
             const dbAllGames = await get_all_games(server.pool);
-            console.log(dbAllGames);
+
             allGames = (Array.isArray(dbAllGames) ? dbAllGames : []).map((game) => ({
                 id: game.name,
                 name: game.name,
-                description: game.description,
-                image: "/game-images/" + game.name.toLowerCase().replace(/\s+/g, '_') + ".jpg"
             }));
 
             const dbFavGames = await get_fav_games(server.pool, dbUser.id);
             favGames = (Array.isArray(dbFavGames) ? dbFavGames : []).map((game) => ({
                 id: game.name,
                 name: game.name,
+                description: game.description,
                 image: "/game-images/" + game.name.toLowerCase().replace(/\s+/g, '_') + ".jpg"
             }));
 
@@ -145,7 +144,7 @@ async function get_user_by_username(pool, username) {
 async function get_all_games(pool) {
     const client = await pool.connect();
     try {
-        const res = await client.query("SELECT name, description FROM games;");
+        const res = await client.query("SELECT name FROM games;");
         return res.rows ?? [];
     } catch (err) {
         console.error('Database error (get_all_games):', err.stack);
@@ -163,7 +162,11 @@ async function get_all_games(pool) {
 async function get_fav_games(pool, userId) {
     const client = await pool.connect();
     try {
-        const res = await client.query("SELECT game_name as name FROM fav_games WHERE user_id = $1", [userId]);
+        const res = await client.query(
+            "SELECT f.game_name as name, g.description FROM fav_games f " +
+            "JOIN games g ON (f.game_name = g.name) WHERE user_id = $1"
+            ,[userId]
+        );
         return res.rows ?? [];
     } catch (err) {
         console.error('Database error (get_fav_games):', err.stack);
