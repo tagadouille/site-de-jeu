@@ -1,0 +1,57 @@
+<%- include('../partials/header.ejs', { title : "User Stats" , is_connect : true, is_display_buttons : true, script : ""
+    , stylesheet_html: '<link rel="stylesheet" href="/css-styles/style.css">'
+    + '<link rel="stylesheet" href="/css-styles/stats.css">' 
+    + '<link rel="stylesheet" href="/css-styles/profile.css">'
+}) %>
+
+<!-------------------------------GLOBAL STATS------------------------------------------>
+    <h1 id="title">User Stats</h1>
+
+    <div id="global" class="mb-4 p-2 border rounded statpane">
+        <h2>Global Games Statistics :</h2>
+        <p>
+            <strong>Total Games Played:</strong>
+            <%= stats.totalGames %> 🕹️
+        </p>
+        <p>
+            <strong>Total Games Won:</strong>
+            <%= stats.totalWins %> 🏆
+        </p>
+        <p>
+            <strong>Win Rate:</strong>
+            <%= stats.winRate %> 🎯
+        </p>
+    </div>
+
+    <!-------------------------------GAMES STATS------------------------------------------>
+    <h3 class = "text-center">Games stats :</h3>
+
+    <div class="mb-4 p-2 row border rounded statpane overflow-scroll justify-content-center mx-auto">
+
+        <% games_stats.forEach(stats=> {
+            %><div class="game-item border rounded p-4 col-md-4 col-12 m-1 text-center">
+                <h3>
+                    <strong><%= stats.game_name %></strong>
+                </h3>
+
+                <img src = "<%= stats.image %>" style = "height: 125px;" class = "mb-2">
+
+                <p>
+                    <strong>Total Games Played:</strong>
+                    <%= stats.number_of_matches %> 🕹️
+                </p>
+                <p>
+                    <strong>Total Games Won:</strong>
+                    <%= stats.number_of_wins %> 🏆
+                </p>
+                <p>
+                    <strong>Win Rate:</strong>
+                    <%= stats.winRate %> 🎯
+                </p>
+            </div>
+            <% }); %>
+    </div>
+
+    <a href="/profile" class="btn btn-sign m-2">Back to profile</a>
+
+    <%- include('../partials/footer.ejs') %>

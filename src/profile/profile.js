@@ -1,4 +1,5 @@
 import { hashPassword, verifyPassword } from '../formProcess/hash.js';
+import { get_image } from '../games/utils.js';
 
 /**
  * Backend for the profile page
@@ -55,7 +56,7 @@ export function runProfile(server) {
                 id: game.name,
                 name: game.name,
                 description: game.description,
-                image: "/game-images/" + game.name.toLowerCase().replace(/\s+/g, '_') + ".jpg"
+                image: get_image(game.name)
             }));
 
             res.render("profile/profile.ejs", {
