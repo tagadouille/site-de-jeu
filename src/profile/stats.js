@@ -1,4 +1,4 @@
-import { get_image } from "../games/utils.js";
+import { get_image } from "../games/game_utils.js";
 
 /**
  * 
@@ -9,26 +9,26 @@ export function runStats(server) {
 
     app.get('/profile/stats', async (req, res) => {
 
-        /*if (!req.session || !req.session.user) {
+        if (!req.session || !req.session.user) {
             return res.redirect('/signin');
-        }*/
+        }
 
         let client;
 
-        //const username = req.session.user.username;
+        const username = req.session.user.username;
 
         try {
 
             client = await server.pool.connect();
 
-            //const user_id = await get_user_id(client, username);
-
-            const user_id = 1;
+            // Obtain the user id from the database :
+            const user_id = await get_user_id(client, username);
 
             if(user_id === 0) {
                 return res.redirect('/signin');
             }
 
+            // Obtain the global stats for the user :
             let rows = await get_stats(client, user_id);
             let global_stats = rows[0];
 
@@ -38,6 +38,8 @@ export function runStats(server) {
                 game.image = get_image(game.game_name);
                 game.winRate = get_win_rates(game.number_of_wins, game.number_of_matches);
             });
+
+            // Render the stats page with the obtained stats :
 
             res.render('profile/stats.ejs', {
                 title: 'User Stats',

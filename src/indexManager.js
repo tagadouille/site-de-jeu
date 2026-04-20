@@ -1,4 +1,4 @@
-import { get_image } from "./games/utils.js";
+import { get_image } from "./games/game_utils.js";
 
 /**
  * Back-end manager for the index page

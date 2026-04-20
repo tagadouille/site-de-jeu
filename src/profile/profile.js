@@ -1,5 +1,5 @@
 import { hashPassword, verifyPassword } from '../formProcess/hash.js';
-import { get_image } from '../games/utils.js';
+import { get_image } from '../games/game_utils.js';
 
 /**
  * Backend for the profile page
