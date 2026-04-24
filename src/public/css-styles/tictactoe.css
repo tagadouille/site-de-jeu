@@ -1,51 +1,40 @@
 
-.game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
-    font-family: Arial, sans-serif;
+:root {
+    --bg-board: #1a0b2e;
+    --bg-cell: #2d1b4e;
+    --bg-cell-hover: #3e256b;
+    --btn-color: #20c997;  
+    --btn-hover: #1aa179;
 }
 
+.status-text {
+    color: var(--bg-board);
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
 
 .board {
-    display: grid;
+    background: var(--bg-board);
     grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 5px;
-    background-color: #333;
-    padding: 5px;
-    border-radius: 10px;
 }
 
 .cell {
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 3rem;
-    font-weight: bold;
+    width: 100px;
+    height: 100px;
+    background: var(--bg-cell);
+    font-size: 4rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
-.cell:hover {
-    background-color: #f0f0f0;
-}
-
-.status {
-    font-size: 1.5rem;
-    margin: 20px 0;
-    font-weight: bold;
-}
+.cell:hover:empty { background: var(--bg-cell-hover); }
+.cell:active { transform: scale(0.95); }
 
 .restart-btn {
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    background-color: var(--btn-color) !important;
 }
-.restart-btn:hover { background-color: #0056b3; }
+
+.restart-btn:hover {
+    background-color: var(--btn-hover) !important; 
+}

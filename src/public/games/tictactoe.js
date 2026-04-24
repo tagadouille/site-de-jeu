@@ -7,7 +7,7 @@ const gameId = "partie_123";
 function updateBoardVisuals(data) {
     cells.forEach((cell, index) => {
         cell.textContent = data.board[index];
-        cell.style.color = data.board[index] === "X" ? "#007BFF" : "#FF4136";
+        cell.style.color = data.board[index] === "X" ? "#20c997" : "#ffc107";
     });
 
     if (data.winner === "Draw") {

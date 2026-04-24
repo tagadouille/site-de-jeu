@@ -12,24 +12,27 @@
 </head>
 <body>
 
-    <div class="game-container">
-        <h1>Tic Tac Toe</h1>
-        <div class="status" id="statusText">Turn of X</div>
-        
-        <div class="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
-        </div>
-
-        <button class="restart-btn" id="restartBtn">Restart</button>
+    <div class="container text-center my-5">
+    <h1 class="mb-4">Tic Tac Toe</h1>
+    
+    <div class="h4 mb-4 fw-bold tracking-wide" id="statusText">Turn of X</div>
+    
+    <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="0"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="1"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="2"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="3"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="4"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="5"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="6"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="7"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="8"></div>
     </div>
+
+    <div class="mt-4">
+        <button class="btn btn-lg px-5 fw-bold text-white shadow-sm restart-btn" id="restartBtn">Restart</button>
+    </div>
+</div>
         
 </body>
 </html>
