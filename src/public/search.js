@@ -47,9 +47,9 @@ function get_image(game_name) {
 }
 
 function get_div(game) {
-    return "<a href=\"/games/<%= game.name.toLowerCase().replace(/\s+/g, '')\">" +
+    return `<a href="/games/${game.name.toLowerCase().replace(/\s+/g, '')}">` +
 
-        "<div>" +
+        `<div class = "search-game rounded m-1 p-2">` +
             `<h5><strong>${game.name}</strong></h5>` +
             `<img src="${get_image(game.name)}" alt="${get_image(game.name)}" class = "search-image img-thumbnail"></img>` +
         "</div>" +
