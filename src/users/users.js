@@ -22,11 +22,20 @@ export function runUsers(server) {
             const playedGamesRes = await client.query("SELECT user_id, game_name, number_of_matches, number_of_wins FROM played_games");
             const favGamesRes = await client.query("SELECT user_id, game_name FROM fav_games");
 
+            const liveMatchesRes = await client.query(`
+                SELECT game_name, player_x_id, player_o_id 
+                FROM live_matches 
+                WHERE status = 'ongoing' AND player_o_id IS NOT NULL
+            `);
+
          
             const allGames = gamesRes.rows.map(g => ({ 
                 id: g.name, 
                 name: g.name 
             }));
+
+            const usernameMap = {};
+            usersRes.rows.forEach(u => usernameMap[u.id] = u.username);
 
             const allUsers = usersRes.rows.map(dbUser => {
                 
@@ -46,13 +55,25 @@ export function runUsers(server) {
 
                 const userFavs = favGamesRes.rows.filter(fg => fg.user_id === dbUser.id);
                 const favoriteGames = userFavs.map(fav => fav.game_name);
+                let playingGame = null;
+                let playingWith = null;
+                const activeMatch = liveMatchesRes.rows.find(match => 
+                    match.player_x_id === dbUser.id || match.player_o_id === dbUser.id
+                );
+
+                if (activeMatch) {
+                    playingGame = activeMatch.game_name;
+                    const opponentId = activeMatch.player_x_id === dbUser.id ? activeMatch.player_o_id : activeMatch.player_x_id;
+                    playingWith = usernameMap[opponentId];
+                    currentStatus = "busy"; 
+                }
 
                 return {
                     username: dbUser.username,
                     isConnected: dbUser.is_connected,
                     status: currentStatus,
-                    playingGame: null,
-                    playingWith: null, 
+                    playingGame: playingGame,
+                    playingWith: playingWith,
                     acceptedGames: acceptedGames,
                     favorite_games: favoriteGames
                 };
