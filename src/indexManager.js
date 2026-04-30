@@ -1,3 +1,5 @@
+import { get_image } from "./games/game_utils.js";
+
 /**
  * Back-end manager for the index page
  * @param {*} app the express app object
@@ -13,7 +15,7 @@ export function runIndex(app) {
             const dbGames = await get_all_games(app.pool);
             games = (Array.isArray(dbGames) ? dbGames : []).map((game) => ({
                 ...game,
-                image: "/game-images/" + game.name.toLowerCase().replace(/\s+/g, '_') + ".jpg"
+                image: get_image(game.name),
             }));
         }
         catch (err) {

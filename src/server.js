@@ -13,6 +13,8 @@ import { runIndex } from "./indexManager.js";
 import { runUsers } from "./users/users.js";
 import { runLogOut } from "./users/log_out.js";
 import { runError } from "./error.js";
+import { runTicTacToe } from "./games/tictactoe.js";
+import { runStats } from "./profile/stats.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 
@@ -27,6 +29,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 dotenv.config({ path: path.join(__dirname, '../config.env') });
 
@@ -68,6 +71,8 @@ runSign(app_obj);
 runProfile(app_obj);
 runUsers(app_obj);
 runLogOut(app_obj);
+runTicTacToe(app_obj);
+runStats(app_obj);
 
 // Handle 404
 app.use(function(req, res, next) {

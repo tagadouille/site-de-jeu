@@ -26,6 +26,11 @@
     color: white;
 }
 
+.game-item img {
+    height: 175px;
+    width: auto;
+}
+
 .game-item:hover {
     background-color: #000036;
 }
