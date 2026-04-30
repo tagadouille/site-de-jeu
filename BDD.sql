@@ -1,8 +1,9 @@
 /*-----------DROP TABLES---------------*/
-DROP TABLE IF EXISTS played_games;
-DROP TABLE IF EXISTS fav_games;
-DROP TABLE IF EXISTS games;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS live_matches CASCADE;
+DROP TABLE IF EXISTS played_games CASCADE;
+DROP TABLE IF EXISTS fav_games CASCADE;
+DROP TABLE IF EXISTS games CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 /*-----------TABLES---------------*/
 
@@ -40,6 +41,21 @@ CREATE TABLE played_games (
   PRIMARY KEY (user_id, game_name),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE
+);
+
+CREATE TABLE live_matches (
+    id SERIAL PRIMARY KEY,
+    game_name VARCHAR(255) NOT NULL,
+    player_x_id INTEGER NOT NULL,
+    player_o_id INTEGER,
+    status VARCHAR(20) DEFAULT 'ongoing',
+    winner_id INTEGER, 
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP,
+    FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE,
+    FOREIGN KEY (player_x_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (player_o_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 /*-----------INSERTIONS---------------*/
