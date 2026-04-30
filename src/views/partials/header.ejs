@@ -79,6 +79,10 @@
 
                         let button_class = "nav-link btn btn-sign mx-1 my-1";
 
+                        %>
+                        <a href="/users" class="<%= button_class%>">Users</a>
+                        <%
+
                         if(is_connect) { %>
                                 <a href="/profile" class= "<%= button_class%>" >Profile</a>
                                 <a href="/logout" class= "<%= button_class%>">Log out</a>

@@ -15,7 +15,7 @@
             <div class="col-lg-3 col-md-4 col-sm-6">
 
                 <div class = "game-wrapper p-0 m-2">
-                    <a href="/game/<%= game.name %>" class = "p-0">
+                    <a href="/games/<%= game.name.toLowerCase().replace(/\s+/g, '') %>" class="p-0">
                         <div class = "game">
                             <h2 class = "game-name"><%= game.name %></h2>
                             <img src="<%= game.image %>" alt="<%= game.name %> image" class = "game-image img-thumbnail">

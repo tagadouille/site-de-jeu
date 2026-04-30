@@ -5,6 +5,11 @@
     stylesheet_html: '<link rel="stylesheet" href="/css-styles/tictactoe.css">'
 }) %>
 
+<script>
+    const GAME_ID = "<%= gameId %>";
+    const CURRENT_USER = "<%= username %>";
+</script>
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -12,24 +17,32 @@
 </head>
 <body>
 
-    <div class="game-container">
-        <h1>Tic Tac Toe</h1>
-        <div class="status" id="statusText">Turn of X</div>
-        
-        <div class="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
-        </div>
-
-        <button class="restart-btn" id="restartBtn">Restart</button>
+    <div class="container text-center my-5">
+    <h1 class="mb-4">Tic Tac Toe</h1>
+    
+    <div class="d-flex justify-content-center gap-4 mb-3 fw-bold" style="color: var(--bg-board); font-size: 1.2rem;">
+        <span id="playerXDisplay" style="color: var(--btn-color);">Player X : ...</span>
+        <span id="playerODisplay" style="color: #ffc107;">Player O : Waiting for an opponent...</span>
     </div>
+
+    <div class="status-text mb-4 tracking-wide" id="statusText">Waiting for players...</div>
+    
+    <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="0"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="1"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="2"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="3"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="4"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="5"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="6"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="7"></div>
+        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="8"></div>
+    </div>
+
+    <div class="mt-4">
+        <button class="btn btn-lg px-5 fw-bold text-white shadow-sm restart-btn" id="restartBtn">Restart</button>
+    </div>
+</div>
         
 </body>
 </html>
