@@ -22,12 +22,14 @@
                 🟢 Online
             <% } else if (user.status === 'busy') { %>
                 🔴 Busy
-            <% } else if (user.status === 'offline') { %>
-                ⚫ Offline
             <% } else { %>
                 <%= user.status %>
             <% } %>
         </p>
+    </div>
+
+    <div class = "justify-content-center mx-auto text-center mb-3">
+        <a class = "btn btn-sign m-2 w-50" href="/profile/stats">See your stats</a>
     </div>
 
     <%- include('profile_forms.ejs') %>
@@ -41,9 +43,11 @@
 
                     <% games.forEach(game => { %>
                         <li class = "game-item my-1 px-4 py-2 border rounded">
-                            <strong><%= game.name %></strong><br>
+                            <div class = "mb-3">
+                                <strong><%= game.name %></strong>
+                            </div>
                             <img src="<%= game.image %>" alt="<%= game.name %>" class = "img-fluid"><br>
-                            <%= game.description %>
+                            <p><%= game.description || "Pas de description" %></p>
                         </li>
                     <% }); %>
 

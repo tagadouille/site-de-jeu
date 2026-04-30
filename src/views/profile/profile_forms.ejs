@@ -17,7 +17,6 @@
                 <select name="status" id="statusSelect" class="form-select">
                     <option value="online" <%= user.status === 'online' ? 'selected' : '' %>>🟢 Online</option>
                     <option value="busy" <%= user.status === 'busy' ? 'selected' : '' %>>🔴 Busy</option>
-                    <option value="offline" <%= user.status === 'offline' ? 'selected' : '' %>>⚫ Offline</option>
                 </select>
             </div>
             
@@ -53,19 +52,21 @@
 
 <div class="mb-4 p-3 border rounded">
 <h2>Manage My Games</h2>
-<form action="/profile" method="POST" class = "w-75">
+<form action="/profile" method="POST" class = "w-100">
     <input type="hidden" name="formType" value="updateGames">
     
     <div class="mb-3">
         <p><strong>Choose games you want to play:</strong></p>
-        <% allGames.forEach(game => { %>
-            <% const isChecked = games.some(g => g.id === game.id) ? 'checked' : ''; %>
-            
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" name="selectedGames" value="<%= game.id %>" id="<%= game.id %>" <%= isChecked %>>
-                <label class="form-check-label" for="<%= game.id %>"><%= game.name %></label>
-            </div>
-        <% }); %>
+        <div class="row justify-content-center">
+            <% allGames.forEach(game => { %>
+                <% const isChecked = games.some(g => g.id === game.id) ? 'checked' : ''; %>
+                
+                <div class="form-check col-6 col-md-4 col-lg-3">
+                    <input class="form-check-input" type="checkbox" name="selectedGames" value="<%= game.id %>" id="<%= game.id %>" <%= isChecked %>>
+                    <label class="form-check-label" for="<%= game.id %>"><%= game.name %></label>
+                </div>
+            <% }); %>
+        </div>
     </div>
     <button type="submit" class="btn btn-sign">Save My Games</button>
 </form>

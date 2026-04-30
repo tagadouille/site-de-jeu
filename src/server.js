@@ -14,6 +14,7 @@ import { runUsers } from "./users/users.js";
 import { runLogOut } from "./users/log_out.js";
 import { runError } from "./error.js";
 import { runTicTacToe } from "./games/tictactoe.js";
+import { runStats } from "./profile/stats.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 
@@ -71,6 +72,7 @@ runProfile(app_obj);
 runUsers(app_obj);
 runLogOut(app_obj);
 runTicTacToe(app_obj);
+runStats(app_obj);
 
 // Handle 404
 app.use(function(req, res, next) {

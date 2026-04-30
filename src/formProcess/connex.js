@@ -52,7 +52,7 @@ export function runConnex(server) {
             console.log(`User ${user.username} logged in successfully!`);
 
             // Set the user session
-            req.session.user = { username: user.username };
+            req.session.user = { id: user.id, username: user.username };
 
             res.redirect('/profile');
         }
@@ -76,7 +76,7 @@ async function get_account(pool, username) {
     try {
         // Execute the query
         const res = await client.query(
-            "SELECT username, password FROM users WHERE username = $1",
+            "SELECT id, username, password FROM users WHERE username = $1",
             [username]
         );
 
