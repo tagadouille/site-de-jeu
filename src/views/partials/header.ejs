@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="/jquery-4.0.0.min.js"></script>
+    <script defer src="search.js"></script>
     <script defer type="module" src="<%= script %>"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <link rel = "stylesheet" href = "/css-styles/header.css">
     <link rel = "stylesheet" href = "/css-styles/footer.css">
+    <link rel="stylesheet" href = "/css-styles/search.css">
     <%- stylesheet_html %>
 
     <!-- Bootstrap CSS -->
@@ -94,7 +96,15 @@
                 } 
                 
                 function search_bar() { %>
-                     <input type="text" class="form-control" placeholder="Search..." name="search">
+
+                    <!--SEARCH BAR + POPUP-->
+                    <div class="search-container position-relative d-inline-block w-100">
+
+                        <input type="text" class="form-control search-input" placeholder="Search..." name="searchBar">
+
+                        <div class="search-popup card p-2 shadow overflow-scroll" style="display:none; position:absolute; max-height: 100px;">
+                        </div>
+                    </div>
                     <%
                 }
             %>
