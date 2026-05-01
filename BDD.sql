@@ -1,5 +1,6 @@
 /*-----------DROP TABLES---------------*/
 DROP TABLE IF EXISTS live_matches CASCADE;
+DROP TABLE IF EXISTS live_chats CASCADE;
 DROP TABLE IF EXISTS played_games CASCADE;
 DROP TABLE IF EXISTS fav_games CASCADE;
 DROP TABLE IF EXISTS games CASCADE;
@@ -56,6 +57,17 @@ CREATE TABLE live_matches (
     FOREIGN KEY (player_x_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (player_o_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE live_chats(
+  sender INTEGER NOT NULL,
+  receiver INTEGER NOT NULL,
+  message TEXT NOT NULL,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  match_id INTEGER NOT NULL,
+  FOREIGN KEY (sender) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (receiver) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (match_id) REFERENCES live_matches(id) ON DELETE CASCADE
 );
 
 /*-----------INSERTIONS---------------*/

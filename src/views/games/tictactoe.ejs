@@ -27,16 +27,23 @@
 
     <div class="status-text mb-4 tracking-wide" id="statusText">Waiting for players...</div>
     
-    <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="0"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="1"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="2"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="3"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="4"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="5"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="6"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="7"></div>
-        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="8"></div>
+    <div class = "row">
+        <div class = "col-6">
+            <%- include('chat.ejs') %>
+        </div>
+
+        <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg col-6">
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="0"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="1"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="2"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="3"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="4"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="5"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="6"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="7"></div>
+            <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="8"></div>
+        </div>
+
     </div>
 
     <div class="mt-4">
