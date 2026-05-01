@@ -1,8 +1,10 @@
 import { sanitizeText } from "./formProcess/sanitize.js";
 
 /**
+ * Function to run the search backend, sets up the route and handles the request
+ * @param {*} server the server object containing the app and database pool
  * 
- * @param {*} server 
+ * @author Elias Dai
  */
 export function runSeach(server) {
 
@@ -33,10 +35,12 @@ export function runSeach(server) {
 }
 
 /**
+ * Function to perform the search query on the database
+ * @param {*} pool the database connection pool
+ * @param {*} query the search query string
+ * @returns the list of games matching the search query
  * 
- * @param {*} pool 
- * @param {*} query 
- * @returns 
+ * @author Elias Dai
  */
 async function search(pool, query) {
 

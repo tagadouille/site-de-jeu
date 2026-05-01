@@ -28,6 +28,10 @@
     background-color: #000027;
 }
 
+.search-game :hover{
+    background-color: #000023;
+}
+
 @media (max-width: 767.98px) {
     .search-container {
         width: 100%;

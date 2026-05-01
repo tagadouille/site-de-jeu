@@ -4,6 +4,8 @@
  * POST route to handle the logout action by destroying the user's 
  * session and redirecting them to the sign-in page.
  * @param {*} server 
+ * 
+ * @author Elias Dai
  */
 export function runLogOut(server) {
 
@@ -46,6 +48,8 @@ export function runLogOut(server) {
  * Set the user as offline
  * @param {*} pool the pool to connect to the database
  * @param {*} username the username of the account to retrieve
+ * 
+ * @author Elias Dai
  */
 async function set_offline(pool, username) {
 
