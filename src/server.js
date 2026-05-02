@@ -14,6 +14,7 @@ import { runUsers } from "./users/users.js";
 import { runLogOut } from "./users/log_out.js";
 import { runError } from "./error.js";
 import { runTicTacToe } from "./games/tictactoe.js";
+import { runChat } from "./games/chat_backend.js";
 import { runStats } from "./profile/stats.js";
 import { runSeach } from "./search_backend.js";
 
@@ -73,6 +74,7 @@ runProfile(app_obj);
 runUsers(app_obj);
 runLogOut(app_obj);
 runTicTacToe(app_obj);
+runChat(app_obj);
 runStats(app_obj);
 runSeach(app_obj);
 

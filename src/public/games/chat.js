@@ -1,19 +1,19 @@
 $(document).ready(function () {
 
     // Recuperation of the metadata :
-    const chat_data = $("#chat-data");
+    const chat_data = $(".chat-data");
 
     const senderId = chat_data.data('sender-id');
     const receiverId = chat_data.data('receiver-id');
-    const matchId = chat_data.data('match-id');
+    const matchId = chat_data.data('match-id').substring(7);
 
     console.log(senderId, receiverId, matchId);
 
     // When the send message button clicked
-    $("#send").click(function () {
+    $("#send").click(async function () {
 
         // Recuperation of the message
-        const message = $("#message").val().trim();
+        const message = $("#message-write").val().trim();
 
         if (message.length === 0) {
             return;
@@ -33,17 +33,25 @@ $(document).ready(function () {
                     message: message
                 }
             )
-        })
+        });
+
+        $("#message-write").val("");
     });
 
     // Receiving message :
     setInterval(async () => {
+
+        if(receiverId === null) {
+            return;
+        }
+
         try {
             const message_data = await fetch(`/api/message/${matchId}/status`);
 
             if (message_data.ok) {
 
-                mess_arr = await message_data.json();
+                const response = await message_data.json();
+                const mess_arr = response.messages || [];
 
                 mess_arr.forEach(data => {
                     add_message(data);
@@ -68,10 +76,10 @@ function add_message(message_data) {
         user = "user2";
     }
 
-    $("#message-container").append(
+    $(".message-container").append(
         `<div class="message rounded ${user}">` +
         `<label><strong>${message_data.sender}</strong></label>` +
-        `<p>${message}</p>`
-            `</div>`
+        `<p>${message_data.message}</p>` +
+        `</div>`
     );
 }

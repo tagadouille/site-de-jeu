@@ -47,24 +47,25 @@ CREATE TABLE played_games (
 CREATE TABLE live_matches (
     id SERIAL PRIMARY KEY,
     game_name VARCHAR(255) NOT NULL,
-    player_x_id INTEGER NOT NULL,
-    player_o_id INTEGER,
+    player1_id INTEGER NOT NULL,
+    player2_id INTEGER,
     status VARCHAR(20) DEFAULT 'ongoing',
     winner_id INTEGER, 
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP,
     FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE,
-    FOREIGN KEY (player_x_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (player_o_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (player1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (player2_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE live_chats(
+  id SERIAL PRIMARY KEY,
   sender INTEGER NOT NULL,
   receiver INTEGER NOT NULL,
   message TEXT NOT NULL,
   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  match_id INTEGER NOT NULL UNIQUE,
+  match_id INTEGER NOT NULL,
   is_read BOOLEAN NOT NULL DEFAULT false,
   FOREIGN KEY (sender) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (receiver) REFERENCES users(id) ON DELETE CASCADE,

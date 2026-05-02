@@ -14,15 +14,18 @@
     </div>
 </div>
 <div class="message-bar">
-
-    <input type="text" value="" name="message" id="message-write" class="rounded">
-    <input type="button" value="📨" name="send" id="send" class="btn btn-sign">
+    <% if(receiver_id === null) { %>
+        <p class="text-muted">Waiting for an opponent to join...</p>
+    <% } else { %>
+        <input type="text" value="" name="message" id="message-write" class="rounded">
+        <input type="button" value="📨" name="send" id="send" class="btn btn-sign">
+    <% } %>
 </div>
 
 <!-----------CHAT METADATA------------->
 <div class="chat-data" 
     data-sender-id="<%= user_id %>"
     data-receiver-id="<%= receiver_id %>"
-    data-conversation-id="<%= match_id %>"
+    data-match-id="<%= gameId %>"
 >
 </div>
