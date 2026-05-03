@@ -9,32 +9,23 @@
 
 .status-text {
     color: var(--bg-board);
-    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-size: 1.5rem;
     font-weight: bold;
     letter-spacing: 1px;
 }
 
 .board {
     background: var(--bg-board);
-    display: grid;
-    grid-template-columns: repeat(3, minmax(60px, 1fr));
-    gap: 0.6rem;
-    width: min(420px, 90vw);
-    margin: 0 auto;
-    padding: 0.5rem;
-    box-sizing: border-box;
+    grid-template-columns: repeat(3, 100px);
 }
 
 .cell {
-    width: 100%;
-    aspect-ratio: 1/1;
+    width: 100px;
+    height: 100px;
     background: var(--bg-cell);
-    font-size: clamp(1.8rem, 6vw, 3.2rem);
+    font-size: 4rem;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .cell:hover:empty { background: var(--bg-cell-hover); }
@@ -48,35 +39,15 @@
     background-color: var(--btn-hover) !important; 
 }
 
-
-.players-row {
-    width: 100%;
-    gap: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    color: var(--bg-board);
-    font-size: clamp(0.9rem, 2.2vw, 1.2rem);
-}
-
 .player-badge {
-    flex: 1 1 200px;
-    min-width: 180px;
-    max-width: 48%;
-    text-align: center;
-    padding: 0.35rem 0.6rem;
-    border-radius: 0.5rem;
-    background: transparent;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.25rem;
+    min-width: 200px;
 }
 
-.player-badge.player1 { color: var(--btn-color); }
-.player-badge.player2 { color: #ffc107; }
+#player1Display {
+    color: #1aa179;
+}
 
-@media (max-width: 480px) {
-    .player-badge { min-width: 140px; max-width: 100%; }
-    .board { gap: 0.4rem; width: 95vw; }
+#player2Display {
+    color: #ffc107;
 }

@@ -20,14 +20,14 @@
     <div class="container text-center my-5">
     <h1 class="mb-4">Tic Tac Toe</h1>
     
-    <div class="players-row d-flex justify-content-center gap-3 mb-3 fw-bold text-truncate">
-        <div id="player1Display" class="player-badge player1">player1 : ...</div>
-        <div id="player2Display" class="player-badge player2">player2 : Waiting for an opponent...</div>
+    <div class="row mb-3 fw-bold w-75 mx-auto">
+        <div id="player1Display" class="player-badge col-12 col-lg-6 mb-2">player1 : ...</div>
+        <div id="player2Display" class="player-badge col-12 col-lg-6">player2 : Waiting for an opponent...</div>
     </div>
 
     <div class="status-text mb-4 tracking-wide" id="statusText">Waiting for players...</div>
     
-    <div class = "row">
+    <div class = "row d-flex justify-content-center align-items-center">
 
         <div class = "col-lg-6 col-mb-12">
             <%- include('chat.ejs', {
