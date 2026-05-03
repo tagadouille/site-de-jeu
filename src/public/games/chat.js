@@ -19,13 +19,13 @@ $(document).ready(function () {
             return;
         }
 
-        if(receiverId === null) {
+        if(receiverId === null || receiverId === undefined) {
             alert("Your opponent is not connected yet. Please wait.");
             return;
         }
 
         // Sending the message :
-        await fetch('/api/message', {
+        const resp = await fetch('/api/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -39,6 +39,11 @@ $(document).ready(function () {
                 }
             )
         });
+
+        // If sent successfully, append locally so sender sees their message immediately
+        if (resp && resp.ok) {
+            add_message({ sender: senderId, message: message }, senderId, receiverId);
+        }
 
         $("#message-write").val("");
     });
@@ -60,7 +65,7 @@ $(document).ready(function () {
                 const mess_arr = response.messages || [];
 
                 mess_arr.forEach(data => {
-                    add_message(data);
+                    add_message(data, senderId, receiverId);
                 });
             }
         } catch (err) {
@@ -74,13 +79,13 @@ $(document).ready(function () {
  * 
  * @param {*} message_data 
  */
-function add_message(message_data) {
+function add_message(message_data, senderId, receiverId) {
 
-    let user = "user1";
+    // compare as strings to avoid type mismatch between DOM data and server numbers
+    const senderStr = String(message_data.sender);
+    const myIdStr = String(senderId);
 
-    if (message_data.senderId !== receiverId && message_data.senderId === senderId) {
-        user = "user2";
-    }
+    const user = senderStr === myIdStr ? "user2" : "user1";
 
     $(".message-container").append(
         `<div class="message rounded ${user}">` +

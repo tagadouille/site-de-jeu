@@ -12,6 +12,7 @@ export function runChat(server) {
 
         if (req.session === undefined || req.session.user === undefined) {
             res.redirect("/signin");
+            return;
         }
 
         const data = req.body;
@@ -24,6 +25,7 @@ export function runChat(server) {
             let hasDatabaseError = false;
 
             try {
+                console.log('add_message payload', { senderId, receiverId, matchId, message });
                 await add_message(server.pool, senderId, receiverId, matchId, message);
                 res.json({ success: true, message: 'Message sent successfully' });
             }
@@ -43,9 +45,11 @@ export function runChat(server) {
 
         if (req.session === undefined || req.session.user === undefined) {
             res.redirect("/signin");
+            return;
         }
 
         const matchId = req.params.matchId;
+        const currentUserId = req.session && req.session.user ? req.session.user.id : null;
 
         console.log("Fetching messages for matchId:", matchId);
 
@@ -56,12 +60,13 @@ export function runChat(server) {
         let messages = [];
 
         try {
-            messages = await get_message(pool, matchId);
+            messages = await get_message(pool, matchId, currentUserId);
         }
         catch (err) {
             console.error(err);
         }
         finally {
+            console.log('Returning messages for matchId', matchId, 'count', messages ? messages.length : 0);
             res.json({
                 messages: messages
             });
@@ -84,9 +89,9 @@ async function add_message(pool, senderId, receiverId, matchId, message) {
     try {
         // Execute the query
         const res = await client.query(
-            "INSERT INTO live_chats (sender, receiver, message, match_id) VALUES " +
-            "($1, $2, $3, $4);",
-            [senderId, receiverId, message, matchId]
+            "INSERT INTO live_chats (sender, receiver, message, match_id, is_read) VALUES " +
+            "($1, $2, $3, $4, $5);",
+            [senderId, receiverId, message, matchId, false]
         );
 
     } catch (err) {
@@ -103,23 +108,29 @@ async function add_message(pool, senderId, receiverId, matchId, message) {
  * @param {*} pool 
  * @param {*} matchId 
  */
-async function get_message(pool, matchId) {
+async function get_message(pool, matchId, userId) {
 
     const client = await pool.connect();
 
     try {
 
         // Get the messages from the databases :
+        // If userId is provided, only fetch messages addressed to that user
+        if (userId === undefined || userId === null) {
+            // fallback: no specific user, return empty
+            return [];
+        }
+
         const res = await client.query(
-            "SELECT * FROM live_chats WHERE match_id = $1 AND is_read = false " +
+            "SELECT * FROM live_chats WHERE match_id = $1 AND receiver = $2 AND is_read = false " +
             "ORDER BY timestamp",
-            [matchId]
+            [matchId, userId]
         );
 
-        // Update them as seen by the users :
+        // Update them as seen by this user :
         await client.query(
-            "UPDATE live_chats SET is_read = true WHERE match_id = $1 AND is_read = false",
-            [matchId]
+            "UPDATE live_chats SET is_read = true WHERE match_id = $1 AND receiver = $2 AND is_read = false",
+            [matchId, userId]
         );
 
         return res.rows ? res.rows : [];
