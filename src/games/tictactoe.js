@@ -180,7 +180,7 @@ export function runTicTacToe(server) {
 
             try {
                 const insertQuery = `
-                    INSERT INTO live_matches (game_name, player_x_id, player_o_id, status) 
+                    INSERT INTO live_matches (game_name, player1_id, player2_id, status) 
                     VALUES ('Tic Tac Toe', $1, $2, 'ongoing') RETURNING id
                 `;
                 const dbRes = await pool.query(insertQuery, [game.player1_id, game.player2_id]);

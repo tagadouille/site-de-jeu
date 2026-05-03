@@ -82,7 +82,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
             game.lastPingPlayer2 = Date.now();
 
             try {
-                const updateQuery = `UPDATE live_matches SET player_o_id = $1 WHERE id = $2`;
+                const updateQuery = `UPDATE live_matches SET player2_id = $1 WHERE id = $2`;
                 await pool.query(updateQuery, [userId, game.dbId]);
             }
             catch (err) {
@@ -117,7 +117,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
         try {
             const insertQuery = `
-                INSERT INTO live_matches (game_name, player_x_id, status) 
+                INSERT INTO live_matches (game_name, player1_id, status) 
                 VALUES ($1, $2, 'ongoing') RETURNING id
             `;
             const dbRes = await pool.query(insertQuery, [game_name, userId]);

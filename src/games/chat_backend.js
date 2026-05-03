@@ -47,6 +47,8 @@ export function runChat(server) {
 
         const matchId = req.params.matchId;
 
+        console.log("Fetching messages for matchId:", matchId);
+
         if (matchId === undefined || matchId === null) {
             return res.json({ messages: [] });
         }
@@ -68,9 +70,12 @@ export function runChat(server) {
 }
 
 /**
- * 
- * @param {*} pool 
- * @returns 
+ * The function adds a message to the database for a given sender, receiver, match ID, and message content.
+ * @param {*} pool the database connection pool
+ * @param {number} senderId the ID of the user sending the message
+ * @param {number} receiverId the ID of the user receiving the message
+ * @param {number} matchId the ID of the match associated with the message
+ * @param {string} message the content of the message to be added to the database
  */
 async function add_message(pool, senderId, receiverId, matchId, message) {
 
