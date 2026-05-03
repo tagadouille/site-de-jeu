@@ -1,37 +1,44 @@
 const cells = document.querySelectorAll('.cell');
 const statusText = document.getElementById('statusText');
 const restartBtn = document.getElementById('restartBtn');
-const playerXDisplay = document.getElementById('playerXDisplay');
-const playerODisplay = document.getElementById('playerODisplay');
+const player1Display = document.getElementById('player1Display');
+const player2Display = document.getElementById('player2Display');
+
+function getCellMark(mark) {
+    if (mark === "player1") return "X";
+    if (mark === "player2") return "O";
+    return mark;
+}
 
 
 function updateBoardVisuals(data) {
     
     cells.forEach((cell, index) => {
-        cell.textContent = data.board[index];
-        cell.style.color = data.board[index] === "X" ? "#20c997" : "#ffc107";
+        const cellMark = getCellMark(data.board[index]);
+        cell.textContent = cellMark;
+        cell.style.color = cellMark === "X" ? "#20c997" : "#ffc107";
     });
 
     
-    playerXDisplay.textContent = `X : ${data.playerX} ${data.playerX === CURRENT_USER ? '(You)' : ''}`;
-    if (data.playerO) {
-        playerODisplay.textContent = `O : ${data.playerO} ${data.playerO === CURRENT_USER ? '(You)' : ''}`;
+    player1Display.textContent = `player1 : ${data.player1} ${data.player1 === CURRENT_USER ? '(You)' : ''}`;
+    if (data.player2) {
+        player2Display.textContent = `player2 : ${data.player2} ${data.player2 === CURRENT_USER ? '(You)' : ''}`;
     } else {
-        playerODisplay.textContent = `O : ⏳ Waiting for an opponent...`;
+        player2Display.textContent = `player2 : ⏳ Waiting for an opponent...`;
     }
 
     
-    const isMyTurn = (data.turn === "X" && data.playerX === CURRENT_USER) || 
-                     (data.turn === "O" && data.playerO === CURRENT_USER);
+    const isMyTurn = (data.turn === "player1" && data.player1 === CURRENT_USER) || 
+                     (data.turn === "player2" && data.player2 === CURRENT_USER);
 
-    if (!data.playerO) {
+    if (!data.player2) {
         statusText.textContent = "⏳ Waiting for an opponent...";
         restartBtn.style.display = "none";
     } else if (data.winner === "Draw") {
         statusText.textContent = "Draw ! 🤝";
         restartBtn.style.display = "inline-block";
     } else if (data.winner) {
-        const winnerName = data.winner === "X" ? data.playerX : data.playerO;
+        const winnerName = data.winner === "player1" ? data.player1 : data.player2;
 
         if (data.forfeit) {
             statusText.textContent = winnerName === CURRENT_USER ? "Opponent forfeited! You win 🏆" : `${winnerName} won by forfeit...`;

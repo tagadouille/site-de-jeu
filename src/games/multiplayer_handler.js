@@ -31,12 +31,10 @@ export async function updatePlayerStats(pool, game_name, userId, isWinner) {
  * @param {object} game - Game object in memory.
  * @param {"player1"|"player2"} winnerKey - Logical key representing the winner.
  * @param {string} game_name - Name of the game for database stats.
- * @param {string} [displayMark] - Optionnel : marque à exposer côté client (ex: "X" ou "O").
  */
-export async function handleDisconnect(pool, game, winnerKey, game_name, displayMark) {
+export async function handleDisconnect(pool, game, winnerKey, game_name) {
 
-    // Affecte un marqueur lisible côté front si fourni (ex: "X"/"O"), sinon stocke la clé logique.
-    game.winner = typeof displayMark === 'string' ? displayMark : winnerKey;
+    game.winner = winnerKey;
     game.forfeit = true;
 
     try {
@@ -105,7 +103,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
         const new_game = {
             board: ["", "", "", "", "", "", "", "", ""],
-            turn: "X",
+            turn: "player1",
             winner: null,
             forfeit: false,
             player1: username,

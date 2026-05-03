@@ -9,8 +9,8 @@ const winConditions = [
 /**
  * Determine the current state of the grid
  *
- * @param {string[]} board - Board of 9 cells containing "", "X" or "O".
- * @returns {"X"|"O"|"Draw"|null} The winner, a draw or `null` if the game is still ongoing.
+ * @param {string[]} board - Board of 9 cells containing "", "player1" or "player2".
+ * @returns {"player1"|"player2"|"Draw"|null} The winner, a draw or `null` if the game is still ongoing.
  */
 function checkWin(board) {
     for (let i = 0; i < winConditions.length; i++) {
@@ -90,12 +90,12 @@ export function runTicTacToe(server) {
             // If a player don't ping, considere it as deconnected :
             if (game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT)) {
 
-                // X don't ping : 0 win by forfait :
-                await handleDisconnect(pool, game, 'player2', 'Tic Tac Toe', 'O'); 
+                // player1 don't ping : player2 win by forfait :
+                await handleDisconnect(pool, game, 'player2', 'Tic Tac Toe'); 
             } else if (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT)) {
 
-                // 0 don't ping : X win by forfait :
-                await handleDisconnect(pool, game, 'player1', 'Tic Tac Toe', 'X'); 
+                // player2 don't ping : player1 win by forfait :
+                await handleDisconnect(pool, game, 'player1', 'Tic Tac Toe'); 
             }
         }
         
@@ -116,7 +116,7 @@ export function runTicTacToe(server) {
         const index = req.body.index;
         const username = req.session.user.username;
 
-        const expectedPlayer = (game.turn === "X") ? game.player1 : game.player2;
+        const expectedPlayer = (game.turn === "player1") ? game.player1 : game.player2;
 
         if (expectedPlayer !== username) {
             return res.status(403).json({ success: false });
@@ -136,7 +136,7 @@ export function runTicTacToe(server) {
                     let winnerId = null;
                     
                     if (game.winner !== "Draw") {
-                        winnerId = game.winner === "X" ? game.player1_id : game.player2_id;
+                        winnerId = game.winner === "player1" ? game.player1_id : game.player2_id;
                     }
 
                     await pool.query(
@@ -144,17 +144,17 @@ export function runTicTacToe(server) {
                         [winnerId, game.dbId]
                     );
 
-                    const isXWinner = game.winner === "X";
-                    const isOWinner = game.winner === "O";
+                    const isPlayer1Winner = game.winner === "player1";
+                    const isPlayer2Winner = game.winner === "player2";
                     
-                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player1_id, isXWinner);
-                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player2_id, isOWinner);
+                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player1_id, isPlayer1Winner);
+                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player2_id, isPlayer2Winner);
 
                 } catch (err) {
                     console.error("Erreur BDD fin de partie:", err);
                 }
             } else {
-                game.turn = (game.turn === "X") ? "O" : "X";
+                game.turn = (game.turn === "player1") ? "player2" : "player1";
             }
             
             res.json({ success: true });
@@ -171,7 +171,7 @@ export function runTicTacToe(server) {
         }
         if (game) {
             game.board = ["", "", "", "", "", "", "", "", ""];
-            game.turn = "X"; 
+            game.turn = "player1"; 
             game.winner = null;
             game.forfeit = false;
             game.lastPingPlayer1 = Date.now(); 
