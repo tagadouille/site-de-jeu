@@ -124,7 +124,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
             // The DB id will also serve as a memory key :
             new_game.dbId = dbRes.rows[0].id;
-            gameIdToJoin = (new_game.dbId + (Date.now() % 120)).toString();
+            gameIdToJoin = (new_game.dbId).toString();
         } 
         catch (err) { 
             console.error("Erreur DB insert match:", err); 

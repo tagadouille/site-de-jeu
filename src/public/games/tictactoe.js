@@ -4,6 +4,11 @@ const restartBtn = document.getElementById('restartBtn');
 const player1Display = document.getElementById('player1Display');
 const player2Display = document.getElementById('player2Display');
 
+/**
+ * Return the mark of the cell based on the player identifier.
+ * @param {player1 | player2} mark 
+ * @returns 
+ */
 function getCellMark(mark) {
     if (mark === "player1") return "X";
     if (mark === "player2") return "O";
@@ -12,14 +17,14 @@ function getCellMark(mark) {
 
 
 function updateBoardVisuals(data) {
-    
+
     cells.forEach((cell, index) => {
         const cellMark = getCellMark(data.board[index]);
         cell.textContent = cellMark;
         cell.style.color = cellMark === "X" ? "#20c997" : "#ffc107";
     });
 
-    
+
     player1Display.textContent = `player1 : ${data.player1} ${data.player1 === CURRENT_USER ? '(You)' : ''}`;
     if (data.player2) {
         player2Display.textContent = `player2 : ${data.player2} ${data.player2 === CURRENT_USER ? '(You)' : ''}`;
@@ -27,9 +32,9 @@ function updateBoardVisuals(data) {
         player2Display.textContent = `player2 : ⏳ Waiting for an opponent...`;
     }
 
-    
-    const isMyTurn = (data.turn === "player1" && data.player1 === CURRENT_USER) || 
-                     (data.turn === "player2" && data.player2 === CURRENT_USER);
+
+    const isMyTurn = (data.turn === "player1" && data.player1 === CURRENT_USER) ||
+        (data.turn === "player2" && data.player2 === CURRENT_USER);
 
     if (!data.player2) {
         statusText.textContent = "⏳ Waiting for an opponent...";
@@ -42,9 +47,9 @@ function updateBoardVisuals(data) {
 
         if (data.forfeit) {
             statusText.textContent = winnerName === CURRENT_USER ? "Opponent forfeited! You win 🏆" : `${winnerName} won by forfeit...`;
-                restartBtn.textContent = "Search for another opponent";
-                restartBtn.style.display = "inline-block";
-                restartBtn.onclick = () => window.location.href = '/games/tictactoe';
+            restartBtn.textContent = "Search for another opponent";
+            restartBtn.style.display = "inline-block";
+            restartBtn.onclick = () => window.location.href = '/games/tictactoe';
         } else {
             statusText.textContent = winnerName === CURRENT_USER ? "🎉 You won!" : `💀 ${winnerName} won...`;
             restartBtn.textContent = "Restart";
@@ -59,20 +64,49 @@ function updateBoardVisuals(data) {
     }
 }
 
-setInterval(async () => {
+let isFirstFetch = true;
+let prevPlayer2 = null;
+
+/**
+ * The function fetches the game status and updates the board visuals. 
+ * It also detects when an opponent joins for the first time and reloads the page to reflect the new state.
+ * @param {boolean} reloadOnJoin - A flag to determine whether to reload the page when an opponent joins. Defaults to true.
+ */
+async function fetchAndUpdate(reloadOnJoin = true) {
     try {
         const response = await fetch(`/api/game/${GAME_ID}/status`);
         if (response.ok) {
             const data = await response.json();
+
+            // First fetch only: seed state without triggering reload
+            if (isFirstFetch) {
+                prevPlayer2 = data.player2 || null;
+                updateBoardVisuals(data);
+                isFirstFetch = false;
+                return;
+            }
+
+            // Detect when player2 just joined (was null/absent, now present)
+            if (!prevPlayer2 && data.player2 && reloadOnJoin) {
+                window.location.reload();
+                return;
+            }
+
+            prevPlayer2 = data.player2 || null;
             updateBoardVisuals(data);
         }
     } catch (err) {
         console.error("Error occurred while fetching game status:", err);
     }
-}, 500);
+}
+
+// Initial fetch to seed state
+fetchAndUpdate(true);
+// Poll regularly and allow reload when an opponent joins
+setInterval(() => fetchAndUpdate(true), 500);
 
 cells.forEach(cell => {
-    cell.addEventListener('click', async function() {
+    cell.addEventListener('click', async function () {
         if (this.textContent !== "") return;
 
         await fetch(`/api/game/${GAME_ID}/play`, {
@@ -84,7 +118,7 @@ cells.forEach(cell => {
 });
 
 restartBtn.addEventListener('click', async () => {
-    await fetch(`/api/game/${GAME_ID}/restart`, { 
-        method: 'POST' 
+    await fetch(`/api/game/${GAME_ID}/restart`, {
+        method: 'POST'
     });
 });

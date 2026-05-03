@@ -105,7 +105,7 @@ export function runTicTacToe(server) {
         });
     });
 
-    // Enregistre un coup si c'est bien le tour du joueur connecté.
+    // Save if a move is the move of the connected player :
     app.post('/api/game/:id/play', async (req, res) => {
 
         if (!req.session || !req.session.user) {
@@ -131,7 +131,8 @@ export function runTicTacToe(server) {
             game.winner = checkWin(game.board);
             
             if (game.winner) {
-                // Fin de partie : on persiste le résultat et les statistiques des deux joueurs.
+
+                // End of the game, we persist the result and the statistics of both players :
                 try {
                     let winnerId = null;
                     
@@ -189,6 +190,6 @@ export function runTicTacToe(server) {
         res.json({ success: true });
     });
 
-    // Nettoyage périodique des parties orphelines en mémoire et en base.
+    // Periodic cleanup of old games :
     cleanup(activeGames, pool);
 }

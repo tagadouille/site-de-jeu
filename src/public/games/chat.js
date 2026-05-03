@@ -5,7 +5,7 @@ $(document).ready(function () {
 
     const senderId = chat_data.data('sender-id');
     const receiverId = chat_data.data('receiver-id');
-    const matchId = chat_data.data('match-id').substring(7);
+    const matchId = String(chat_data.data('match-id') ?? '');
 
     console.log(senderId, receiverId, matchId);
 
@@ -16,6 +16,11 @@ $(document).ready(function () {
         const message = $("#message-write").val().trim();
 
         if (message.length === 0) {
+            return;
+        }
+
+        if(receiverId === null) {
+            alert("Your opponent is not connected yet. Please wait.");
             return;
         }
 
@@ -51,6 +56,7 @@ $(document).ready(function () {
             if (message_data.ok) {
 
                 const response = await message_data.json();
+                console.log(response);
                 const mess_arr = response.messages || [];
 
                 mess_arr.forEach(data => {
