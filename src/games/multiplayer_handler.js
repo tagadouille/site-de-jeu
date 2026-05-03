@@ -1,11 +1,13 @@
+export const activeGames = {};
+
 /**
- * Met à jour les statistiques d'un joueur pour un jeu.
- * API générique utilisable par plusieurs jeux.
+ * Update the statistics of a player for a game.
+ * Generic API usable by multiple games.
  *
  * @param {object} pool - Pool PostgreSQL.
- * @param {string} game_name - Nom du jeu (stocké en base).
- * @param {number} userId - Identifiant du joueur.
- * @param {boolean} isWinner - Indique si le joueur a gagné la partie.
+ * @param {string} game_name - Name of the game (stored in DB).
+ * @param {number} userId - Player id in the database.
+ * @param {boolean} isWinner - If the player win the game
  */
 export async function updatePlayerStats(pool, game_name, userId, isWinner) {
 
@@ -23,24 +25,22 @@ export async function updatePlayerStats(pool, game_name, userId, isWinner) {
 }
 
 /**
- * Gère un forfait quand un joueur ne répond plus (générique).
+ * Handle a forfeit when a player is unresponsive (generic).
  *
  * @param {object} pool - Pool PostgreSQL.
- * @param {object} game - Objet partie en mémoire.
- * @param {"player1"|"player2"} winnerKey - Clé logique représentant le gagnant.
- * @param {object} mapping - Objet décrivant les clés utilisées dans l'objet `game` et en BDD.
- * @param {string} game_name - Nom du jeu pour les stats en base.
+ * @param {object} game - Game object in memory.
+ * @param {"player1"|"player2"} winnerKey - Logical key representing the winner.
+ * @param {string} game_name - Name of the game for database stats.
  * @param {string} [displayMark] - Optionnel : marque à exposer côté client (ex: "X" ou "O").
  */
-export async function handleDisconnect(pool, game, winnerKey, mapping, game_name, displayMark) {
+export async function handleDisconnect(pool, game, winnerKey, game_name, displayMark) {
 
     // Affecte un marqueur lisible côté front si fourni (ex: "X"/"O"), sinon stocke la clé logique.
     game.winner = typeof displayMark === 'string' ? displayMark : winnerKey;
     game.forfeit = true;
 
     try {
-        // Récupère l'id du gagnant à partir du mapping fourni.
-        const winnerId = game[mapping[winnerKey + 'IdKey']];
+        const winnerId = winnerKey === 'player1' ? game.player1_id : game.player2_id;
 
         await pool.query(
             `UPDATE live_matches SET status = 'finished', winner_id = $1, ended_at = CURRENT_TIMESTAMP WHERE id = $2`,
@@ -48,25 +48,23 @@ export async function handleDisconnect(pool, game, winnerKey, mapping, game_name
         );
 
         // Met à jour les stats des deux joueurs (gagnant ou non).
-        await updatePlayerStats(pool, game_name, game[mapping.player1IdKey], winnerKey === 'player1');
-        await updatePlayerStats(pool, game_name, game[mapping.player2IdKey], winnerKey === 'player2');
+        await updatePlayerStats(pool, game_name, game.player1_id, winnerKey === 'player1');
+        await updatePlayerStats(pool, game_name, game.player2_id, winnerKey === 'player2');
     } catch (err) {
         console.error("Erreur BDD Forfait:", err);
     }
 }
 
 /**
- * Matchmaking générique : rejoint une partie existante ou en crée une nouvelle.
- *
+ * Matchmaking : Join an existing game or create a new one if none is available.
  * @param {*} req
  * @param {*} res
- * @param {object} activeGames - Objet contenant les parties en mémoire.
+ * @param {object} activeGames - Object that contains the games in memory.
  * @param {object} pool - Pool PostgreSQL.
- * @param {string} game_name - Nom du jeu pour la BDD (ex: "Tic Tac Toe").
- * @param {string} routeBase - Segment de route pour la redirection (ex: "tictactoe").
- * @param {object} mapping - Mapping des clés entre mémoire et BDD (voir doc).
+ * @param {string} game_name - Name of the game for the database (e.g., "Tic Tac Toe").
+ * @param {string} routeBase - Final route : `/games/${routeBase}/${gameIdToJoin}`.
  */
-export async function match_making(req, res, activeGames, pool, game_name, routeBase, mapping) {
+export async function match_making(req, res, activeGames, pool, game_name, routeBase) {
 
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
@@ -78,15 +76,15 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
     for (const [id, game] of Object.entries(activeGames)) {
 
-        // Si une partie attend un joueur2 et que ce n'est pas le même utilisateur
-        if (game[mapping.player2Key] === null && game[mapping.player1Key] !== username) {
+        // If a game is waiting for a second player and it's not the same user, join it :
+        if (game.player2 === null && game.player1 !== username) {
             gameIdToJoin = id;
-            game[mapping.player2Key] = username;
-            game[mapping.player2IdKey] = userId;
-            game[mapping.lastPing2Key] = Date.now();
+            game.player2 = username;
+            game.player2_id = userId;
+            game.lastPingPlayer2 = Date.now();
 
             try {
-                const updateQuery = `UPDATE live_matches SET ${mapping.dbPlayer2Field} = $1 WHERE id = $2`;
+                const updateQuery = `UPDATE live_matches SET player_o_id = $1 WHERE id = $2`;
                 await pool.query(updateQuery, [userId, game.dbId]);
             }
             catch (err) {
@@ -94,15 +92,15 @@ export async function match_making(req, res, activeGames, pool, game_name, route
             }
             break;
         }
-        // Si le joueur a déjà créé la partie et attend le second joueur
-        else if (game[mapping.player1Key] === username && game[mapping.player2Key] === null) {
+        // If the playe has already create the game and wait for the second player :
+        else if (game.player1 === username && game.player2 === null) {
             gameIdToJoin = id;
-            game[mapping.lastPing2Key] = Date.now();
+            game.lastPingPlayer2 = Date.now();
             break;
         }
     }
 
-    // Aucune partie ouverte : on initialise une nouvelle entrée mémoire et BDD.
+    // No game open : initialize a new memory and DB entry :
     if (!gameIdToJoin) {
 
         const new_game = {
@@ -110,26 +108,25 @@ export async function match_making(req, res, activeGames, pool, game_name, route
             turn: "X",
             winner: null,
             forfeit: false,
+            player1: username,
+            player1_id: userId,
+            player2: null,
+            player2_id: null,
+            lastPingPlayer1: Date.now(),
+            lastPingPlayer2: null,
+            dbId: null,
         };
-
-        // Ajout des champs dynamiquement selon le mapping fourni
-        new_game[mapping.player1Key] = username;
-        new_game[mapping.player1IdKey] = userId;
-        new_game[mapping.player2Key] = null;
-        new_game[mapping.player2IdKey] = null;
-        new_game[mapping.lastPing1Key] = Date.now();
-        new_game[mapping.lastPing2Key] = null;
-        new_game.dbId = null;
 
         try {
             const insertQuery = `
-                INSERT INTO live_matches (game_name, ${mapping.dbPlayer1Field}, status) 
+                INSERT INTO live_matches (game_name, player_x_id, status) 
                 VALUES ($1, $2, 'ongoing') RETURNING id
             `;
             const dbRes = await pool.query(insertQuery, [game_name, userId]);
-            // L'identifiant BDD servira aussi de clé mémoire si souhaité.
-            gameIdToJoin = dbRes.rows[0].id;
-            new_game.dbId = gameIdToJoin;
+
+            // The DB id will also serve as a memory key :
+            new_game.dbId = dbRes.rows[0].id;
+            gameIdToJoin = (new_game.dbId + (Date.now() % 120)).toString();
         } 
         catch (err) { 
             console.error("Erreur DB insert match:", err); 
@@ -143,13 +140,12 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
 
 /**
- * Nettoyage périodique des parties orphelines (générique).
+ * Periodically clean up orphaned games :
  *
- * @param {object} activeGames - Objet contenant les parties en mémoire.
+ * @param {object} activeGames - Object that contains the games in memory.
  * @param {object} pool - Pool PostgreSQL.
- * @param {object} mapping - Mapping des clés pour retrouver les pings et champs BDD.
  */
-export function cleanup(activeGames, pool, mapping) {
+export function cleanup(activeGames, pool) {
 
     setInterval(async () => {
 
@@ -158,8 +154,8 @@ export function cleanup(activeGames, pool, mapping) {
 
         for (const [id, game] of Object.entries(activeGames)) {
 
-            const isPlayer1Gone = game[mapping.lastPing1Key] && (now - game[mapping.lastPing1Key] > TIMEOUT);
-            const isPlayer2Gone = game[mapping.player1Key] === null || (game[mapping.lastPing2Key] && (now - game[mapping.lastPing2Key] > TIMEOUT));
+            const isPlayer1Gone = game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT);
+            const isPlayer2Gone = game.player2 === null || (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT));
 
             if (isPlayer1Gone && isPlayer2Gone) {
                 

@@ -1,6 +1,4 @@
-import { match_making, handleDisconnect, updatePlayerStats, cleanup } from "./multiplayer_handler.js";
-
-const activeGames = {};
+import { activeGames, match_making, handleDisconnect, updatePlayerStats, cleanup } from "./multiplayer_handler.js";
 
 const winConditions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -9,10 +7,10 @@ const winConditions = [
 ];
 
 /**
- * Détermine l'état courant de la grille.
+ * Determine the current state of the grid
  *
- * @param {string[]} board - Tableau de 9 cases contenant "", "X" ou "O".
- * @returns {"X"|"O"|"Draw"|null} Le gagnant, un match nul ou `null` si la partie continue.
+ * @param {string[]} board - Board of 9 cells containing "", "X" or "O".
+ * @returns {"X"|"O"|"Draw"|null} The winner, a draw or `null` if the game is still ongoing.
  */
 function checkWin(board) {
     for (let i = 0; i < winConditions.length; i++) {
@@ -26,40 +24,27 @@ function checkWin(board) {
 }
 
 /**
- * Backend du jeu Tic Tac Toe.
+ * Backend of the Tic Tac Toe game
  *
- * Ce module gère :
- * - la création et la jonction des parties en mémoire,
- * - la synchronisation minimale avec la base de données,
- * - le suivi des pings pour détecter les déconnexions,
- * - l'enregistrement des victoires / matchs joués.
+ * This module handles:
+ * - The creation and joining of games in memory,
+ * - The minimal synchronization with the database (match creation, match end),
+ * - The tracking of pings to detect disconnections,
+ * - The game logic itself is entirely handled in memory for responsiveness, with periodic sync to the database.
  *
- * @param {object} server - Objet serveur contenant `app` et `pool`.
+ * @param {object} server - Server object containing `app` and `pool`.
  */
 export function runTicTacToe(server) {
 
     let app = server.app;
     let pool = server.pool;
 
-    // Mapping générique entre les noms utilisés par TicTacToe et les clés attendues
-    const mapping = {
-        player1Key: 'playerX',
-        player1IdKey: 'playerX_id',
-        player2Key: 'playerO',
-        player2IdKey: 'playerO_id',
-        lastPing1Key: 'lastPingX',
-        lastPing2Key: 'lastPingO',
-        dbPlayer1Field: 'player_x_id',
-        dbPlayer2Field: 'player_o_id'
-    };
-
-    // Accueil du jeu : on rejoint une partie existante si possible, sinon on en crée une.
+    // Game main menu : join an existant game if possible, else create a new :
     app.get('/games/tictactoe', async (req, res) => {
-        // Utilise le gestionnaire générique en passant le pool, le nom en BDD et la route de redirection
-        await match_making(req, res, activeGames, pool, 'Tic Tac Toe', 'tictactoe', mapping);
+        await match_making(req, res, activeGames, pool, 'Tic Tac Toe', 'tictactoe');
     });
 
-    // Page de la partie : on transmet les informations utiles au front et au chat.
+    // Game page : transmit useful information to the front and the chat :
     app.get('/games/tictactoe/:id', (req, res) => {
         if (!req.session || !req.session.user) return res.redirect('/signin');
         
@@ -67,11 +52,11 @@ export function runTicTacToe(server) {
         if (!game) return res.redirect('/games/tictactoe');
 
         // Get the opponent's user id for chat purposes :
-        const receiver_id = req.session.user.username === game.playerX
-            ? game.playerO_id
-            : game.playerX_id;
+        const receiver_id = req.session.user.username === game.player1
+            ? game.player2_id
+            : game.player1_id;
 
-        console.log(receiver_id === null);
+        //TODO Cas intrus
 
         res.render("games/tictactoe.ejs", { 
             is_connect: true, 
@@ -83,33 +68,40 @@ export function runTicTacToe(server) {
         }); 
     });
 
-    // Point de synchronisation utilisé par le front pour rafraîchir l'état de la partie.
+    // Syncronization point use by the front for refresh the game state :
     app.get('/api/game/:id/status', async(req, res) => {
-        const game = activeGames[req.params.id];
-        if (!game) return res.status(404).json({ error: "Partie introuvable" });
 
+        const game = activeGames[req.params.id];
+        if (!game) {
+            return res.status(404).json({ error: "Partie introuvable" });
+        }
+
+        // Save the last ping :
         if (req.session && req.session.user) {
             const username = req.session.user.username;
-            if (username === game.playerX) game.lastPingX = Date.now();
-            if (username === game.playerO) game.lastPingO = Date.now();
+            if (username === game.player1) game.lastPingPlayer1 = Date.now();
+            if (username === game.player2) game.lastPingPlayer2 = Date.now();
         }
-        if (game.playerO !== null && game.winner === null) {
+
+        if (game.player2 !== null && game.winner === null) {
             const now = Date.now();
             const TIMEOUT = 6000;
 
-            // Si un joueur ne ping plus, on le considère comme déconnecté.
-            if (game.lastPingX && (now - game.lastPingX > TIMEOUT)) {
-                // X n'a pas pingé : O remporte par forfait
-                await handleDisconnect(pool, game, 'player2', mapping, 'Tic Tac Toe', 'O'); 
-            } else if (game.lastPingO && (now - game.lastPingO > TIMEOUT)) {
-                // O n'a pas pingé : X remporte par forfait
-                await handleDisconnect(pool, game, 'player1', mapping, 'Tic Tac Toe', 'X'); 
+            // If a player don't ping, considere it as deconnected :
+            if (game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT)) {
+
+                // X don't ping : 0 win by forfait :
+                await handleDisconnect(pool, game, 'player2', 'Tic Tac Toe', 'O'); 
+            } else if (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT)) {
+
+                // 0 don't ping : X win by forfait :
+                await handleDisconnect(pool, game, 'player1', 'Tic Tac Toe', 'X'); 
             }
         }
         
         res.json({ 
             board: game.board, turn: game.turn, winner: game.winner,
-            playerX: game.playerX, playerO: game.playerO, forfeit: game.forfeit
+            player1: game.player1, player2: game.player2, forfeit: game.forfeit
         });
     });
 
@@ -124,13 +116,13 @@ export function runTicTacToe(server) {
         const index = req.body.index;
         const username = req.session.user.username;
 
-        const expectedPlayer = (game.turn === "X") ? game.playerX : game.playerO;
+        const expectedPlayer = (game.turn === "X") ? game.player1 : game.player2;
 
         if (expectedPlayer !== username) {
             return res.status(403).json({ success: false });
         }
 
-        if (game.playerO === null) {
+        if (game.player2 === null) {
             return res.status(400).json({ success: false });
         }
 
@@ -144,7 +136,7 @@ export function runTicTacToe(server) {
                     let winnerId = null;
                     
                     if (game.winner !== "Draw") {
-                        winnerId = game.winner === "X" ? game.playerX_id : game.playerO_id;
+                        winnerId = game.winner === "X" ? game.player1_id : game.player2_id;
                     }
 
                     await pool.query(
@@ -155,8 +147,8 @@ export function runTicTacToe(server) {
                     const isXWinner = game.winner === "X";
                     const isOWinner = game.winner === "O";
                     
-                    await updatePlayerStats(pool, 'Tic Tac Toe', game.playerX_id, isXWinner);
-                    await updatePlayerStats(pool, 'Tic Tac Toe', game.playerO_id, isOWinner);
+                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player1_id, isXWinner);
+                    await updatePlayerStats(pool, 'Tic Tac Toe', game.player2_id, isOWinner);
 
                 } catch (err) {
                     console.error("Erreur BDD fin de partie:", err);
@@ -171,10 +163,10 @@ export function runTicTacToe(server) {
         }
     });
 
-    // Réinitialise la grille sans supprimer la partie si les deux joueurs sont encore présents.
+    // Reinitialize the grid without deleting the game if the two players are always presents :
     app.post('/api/game/:id/restart', async(req, res) => {
         const game = activeGames[req.params.id];
-        if (!game || game.forfeit || game.playerO === null) {
+        if (!game || game.forfeit || game.player2 === null) {
             return res.status(400).json({ success: false, message: "Impossible de relancer." });
         }
         if (game) {
@@ -182,15 +174,15 @@ export function runTicTacToe(server) {
             game.turn = "X"; 
             game.winner = null;
             game.forfeit = false;
-            game.lastPingX = Date.now(); 
-            game.lastPingO = Date.now();
+            game.lastPingPlayer1 = Date.now(); 
+            game.lastPingPlayer2 = Date.now();
 
             try {
                 const insertQuery = `
                     INSERT INTO live_matches (game_name, player_x_id, player_o_id, status) 
                     VALUES ('Tic Tac Toe', $1, $2, 'ongoing') RETURNING id
                 `;
-                const dbRes = await pool.query(insertQuery, [game.playerX_id, game.playerO_id]);
+                const dbRes = await pool.query(insertQuery, [game.player1_id, game.player2_id]);
                 game.dbId = dbRes.rows[0].id;
             } catch (err) { console.error("Erreur DB restart:", err); }
         }
@@ -198,5 +190,5 @@ export function runTicTacToe(server) {
     });
 
     // Nettoyage périodique des parties orphelines en mémoire et en base.
-    cleanup(activeGames, pool, mapping);
+    cleanup(activeGames, pool);
 }
