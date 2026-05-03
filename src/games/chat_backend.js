@@ -122,8 +122,10 @@ async function get_message(pool, matchId, userId) {
         }
 
         const res = await client.query(
-            "SELECT * FROM live_chats WHERE match_id = $1 AND receiver = $2 AND is_read = false " +
-            "ORDER BY timestamp",
+            "SELECT live_chats.id, receiver, sender, message, username as sender_username FROM live_chats " +
+            "JOIN users ON (live_chats.sender = users.id) " +
+            "WHERE match_id = $1 AND ((receiver = $2 AND is_read = false) OR sender = $2) " +
+            "ORDER BY timestamp, live_chats.id",
             [matchId, userId]
         );
 
