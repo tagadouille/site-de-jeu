@@ -1,31 +1,39 @@
-<script defer src="/games/chat.js"></script>
-<link rel="stylesheet" href="/css-styles/chat.css">
+<h1><strong>Chat : </strong></h1>
 
-<!-----------MESSAGE CONTAINER------------->
-<div class="message-container">
+<div class = "chatpane rounded-4 shadow-lg p-3 m-3">
 
-    <div class="message rounded user1">
-        <label><strong>Pseudo 1</strong></label>
-        <p>Bonjour es-tu prêt ?</p>
+    <script defer src="/games/chat.js"></script>
+    <link rel="stylesheet" href="/css-styles/chat.css">
+
+    <!-----------MESSAGE CONTAINER------------->
+    <div class="message-container overflow-scroll mx-3">
+
+        <div class="message rounded user1">
+            <label><strong>Pseudo 1</strong></label>
+            <p>Bonjour es-tu prêt ?</p>
+        </div>
+        <div class="message rounded user2">
+            <label><strong>Pseudo 2</strong></label>
+            <p>Oui commençons !</p>
+        </div>
     </div>
-    <div class="message rounded user2">
-        <label><strong>Pseudo 2</strong></label>
-        <p>Oui commençons !</p>
-    </div>
-</div>
-<div class="message-bar">
-    <% if(receiver_id === null) { %>
-        <p class="text-muted">Waiting for an opponent to join...</p>
-    <% } else { %>
-        <input type="text" value="" name="message" id="message-write" class="rounded">
-        <input type="button" value="📨" name="send" id="send" class="btn btn-sign">
-    <% } %>
-</div>
 
-<!-----------CHAT METADATA------------->
-<div class="chat-data" 
-    data-sender-id="<%= user_id %>"
-    data-receiver-id="<%= receiver_id %>"
-    data-match-id="<%= gameId %>"
->
+    <div id = "message-bar" class = "rounded p-1 pt-2">
+        <% if(receiver_id === null) { %>
+            <p class="text-muted">Waiting for an opponent to join...</p>
+        <% } else { %>
+            <input type="text" value="" name="message" id="message-write" class="rounded">
+            <button type="button" name="send" id="send" class="btn btn-sign">
+                📨
+            </button>
+        <% } %>
+    </div>
+
+    <!-----------CHAT METADATA------------->
+    <div class="chat-data" 
+        data-sender-id="<%= user_id %>"
+        data-receiver-id="<%= receiver_id %>"
+        data-match-id="<%= gameId %>"
+    >
+    </div>
 </div>

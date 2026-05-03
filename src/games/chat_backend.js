@@ -51,8 +51,6 @@ export function runChat(server) {
         const matchId = req.params.matchId;
         const currentUserId = req.session && req.session.user ? req.session.user.id : null;
 
-        console.log("Fetching messages for matchId:", matchId);
-
         if (matchId === undefined || matchId === null) {
             return res.json({ messages: [] });
         }
@@ -66,7 +64,7 @@ export function runChat(server) {
             console.error(err);
         }
         finally {
-            console.log('Returning messages for matchId', matchId, 'count', messages ? messages.length : 0);
+            
             res.json({
                 messages: messages
             });

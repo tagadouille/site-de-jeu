@@ -1,5 +1,11 @@
+.chatpane {
+
+    background-color: #260048;
+}
+
 .message-container {
 
+    height: 250px;
 }
 
 .user1 {
@@ -12,14 +18,11 @@
     background-color: cadetblue;
 }
 
-.message-bar {
+#message-bar {
 
+    background-color: #d0d0d0;
 }
 
-#message-write {
+#message-write {}
 
-}
-
-#message-send {
-
-}
+#message-send {}
