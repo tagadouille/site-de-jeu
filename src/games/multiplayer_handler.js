@@ -102,7 +102,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
     if (!gameIdToJoin) {
 
         const new_game = {
-            board: ["", "", "", "", "", "", "", "", ""],
+            board: ["", "", "", "", "", "", "", "", ""], // TODO : make it generic for other games
             turn: "player1",
             winner: null,
             forfeit: false,
@@ -147,28 +147,71 @@ export function cleanup(activeGames, pool) {
 
     setInterval(async () => {
 
+        deleteMatchFromDB(pool).catch(err => console.error("Erreur nettoyage DB:", err));
+
         const now = Date.now();
-        const TIMEOUT = 10000; 
+        const TIMEOUT = 10000;
 
         for (const [id, game] of Object.entries(activeGames)) {
 
             const isPlayer1Gone = game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT);
-            const isPlayer2Gone = game.player2 === null || (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT));
+            const isPlayer2Gone = game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT);
 
-            if (isPlayer1Gone && isPlayer2Gone) {
-                
-                if (game.winner === null && game.dbId) {
+            const player1Present = !!game.player1 && !isPlayer1Gone;
+            const player2Present = !!game.player2 && !isPlayer2Gone;
+
+            // Both players gone -> mark finished and remove from memory
+            if (!player1Present && !player2Present) {
+                if (game.dbId) {
                     try {
                         await pool.query(
                             `UPDATE live_matches SET status = 'finished', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'ongoing'`,
                             [game.dbId]
                         );
-                    } catch (err) { 
-                        console.error("Erreur nettoyage fantôme:", err); 
+                    } catch (err) {
+                        console.error("Erreur nettoyage fantôme:", err);
                     }
                 }
-                delete activeGames[id]; 
+                delete activeGames[id];
+                continue;
+            }
+
+            // One player gone, other still present -> treat as forfeit
+            try {
+                if (!player1Present && player2Present) {
+                    // player2 wins by forfeit
+                    if (!game.forfeit) await handleDisconnect(pool, game, 'player2', undefined);
+                    delete activeGames[id];
+                    continue;
+                }
+
+                if (!player2Present && player1Present) {
+                    // player1 wins by forfeit
+                    if (!game.forfeit) await handleDisconnect(pool, game, 'player1', undefined);
+                    delete activeGames[id];
+                    continue;
+                }
+            } catch (err) {
+                console.error('Erreur lors du traitement du forfait:', err);
+                // Ensure the stale game is removed to avoid infinite loops
+                delete activeGames[id];
             }
         }
     }, 15000);
+}
+
+/**
+ * Delete the matches in the database if there are
+ * mark as finished and ended since 30min
+ * @param {*} pool 
+ * @returns 
+ */
+function deleteMatchFromDB(pool) {
+
+    return pool.query(
+        `DELETE FROM live_matches
+         WHERE status = 'finished'
+           AND ended_at IS NOT NULL
+           AND ended_at <= CURRENT_TIMESTAMP - INTERVAL '30 minutes'`
+    );
 }
