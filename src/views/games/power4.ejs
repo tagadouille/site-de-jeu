@@ -6,8 +6,8 @@
 }) %>
 
 <script>
-    const GAME_ID = "<%= gameId %>";
-    const CURRENT_USER = "<%= username %>";
+    window.GAME_ID = "<%= gameId %>";
+    window.CURRENT_USER = "<%= username %>";
 </script>
 
 <html lang="fr">
@@ -39,10 +39,9 @@
 
         <div class = "col-lg-6 col-mb-12">
             <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
-
-                <% for (let index = 0; index < gridSize; index++) {
-                    <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="<%=index%>"></div>
-                } %>
+                <% for (let index = 0; index < gridSize; index++) { %>
+                    <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="<%= index %>"></div>
+                <% } %>
             </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { activeGames, match_making, handleDisconnect, updatePlayerStats, cleanup } from "./multiplayer_handler.js";
+import { activeGames, match_making, handleDisconnect, updatePlayerStats, cleanup, refresh_game_state, manage_move } from "./multiplayer_handler.js";
 
 const GRID_SIZE = 6; // 6 rows and columns
 
@@ -40,7 +40,10 @@ export function runPower4(server) {
         if (!req.session || !req.session.user) return res.redirect('/signin');
         
         const game = activeGames[req.params.id];
-        if (!game) return res.redirect('/games/power4');
+
+        if (!game) {
+            return res.redirect('/games/power4');
+        }
 
         // Get the opponent's user id for chat purposes :
         const receiver_id = req.session.user.username === game.player1
@@ -52,6 +55,7 @@ export function runPower4(server) {
         res.render("games/power4.ejs", { 
             is_connect: true, 
             is_display_buttons: true,
+            gridSize : GRID_SIZE,
             gameId: req.params.id,              
             username: req.session.user.username,
             user_id : req.session.user.id,
@@ -60,100 +64,10 @@ export function runPower4(server) {
     });
 
     // Syncronization point use by the front for refresh the game state :
-    app.get('/api/game/:id/status', async(req, res) => {
-
-        const game = activeGames[req.params.id];
-        if (!game) {
-            return res.status(404).json({ error: "Partie introuvable" });
-        }
-
-        // Save the last ping :
-        if (req.session && req.session.user) {
-            const username = req.session.user.username;
-            if (username === game.player1) game.lastPingPlayer1 = Date.now();
-            if (username === game.player2) game.lastPingPlayer2 = Date.now();
-        }
-
-        if (game.player2 !== null && game.winner === null) {
-            const now = Date.now();
-            const TIMEOUT = 6000;
-
-            // If a player don't ping, considere it as deconnected :
-            if (game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT)) {
-
-                // player1 don't ping : player2 win by forfait :
-                await handleDisconnect(pool, game, 'player2', 'Power 4'); 
-            } else if (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT)) {
-
-                // player2 don't ping : player1 win by forfait :
-                await handleDisconnect(pool, game, 'player1', 'Power 4'); 
-            }
-        }
-        
-        res.json({ 
-            board: game.board, turn: game.turn, winner: game.winner,
-            player1: game.player1, player2: game.player2, forfeit: game.forfeit
-        });
-    });
+    refresh_game_state(app, 'Power 4', activeGames, pool);
 
     // Save if a move is the move of the connected player :
-    app.post('/api/game/:id/play', async (req, res) => {
-
-        if (!req.session || !req.session.user) {
-            return res.status(401).json({ success: false });
-        }
-
-        const game = activeGames[req.params.id];
-        const index = req.body.index;
-        const username = req.session.user.username;
-
-        const expectedPlayer = (game.turn === "player1") ? game.player1 : game.player2;
-
-        if (expectedPlayer !== username) {
-            return res.status(403).json({ success: false });
-        }
-
-        if (game.player2 === null) {
-            return res.status(400).json({ success: false });
-        }
-
-        if (game && game.board[index] === "" && game.winner === null) {
-            game.board[index] = game.turn;
-            game.winner = checkWin(game.board);
-            
-            if (game.winner) {
-
-                // End of the game, we persist the result and the statistics of both players :
-                try {
-                    let winnerId = null;
-                    
-                    if (game.winner !== "Draw") {
-                        winnerId = game.winner === "player1" ? game.player1_id : game.player2_id;
-                    }
-
-                    await pool.query(
-                        `UPDATE live_matches SET status = 'finished', winner_id = $1, ended_at = CURRENT_TIMESTAMP WHERE id = $2`,
-                        [winnerId, game.dbId]
-                    );
-
-                    const isPlayer1Winner = game.winner === "player1";
-                    const isPlayer2Winner = game.winner === "player2";
-                    
-                    await updatePlayerStats(pool, 'Power 4', game.player1_id, isPlayer1Winner);
-                    await updatePlayerStats(pool, 'Power 4', game.player2_id, isPlayer2Winner);
-
-                } catch (err) {
-                    console.error("Erreur BDD fin de partie:", err);
-                }
-            } else {
-                game.turn = (game.turn === "player1") ? "player2" : "player1";
-            }
-            
-            res.json({ success: true });
-        } else {
-            res.status(400).json({ success: false });
-        }
-    });
+    manage_move(app, 'Power 4', activeGames, pool, checkWin);
 
     // Reinitialize the grid without deleting the game if the two players are always presents :
     app.post('/api/game/:id/restart', async(req, res) => {

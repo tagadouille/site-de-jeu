@@ -37,6 +37,8 @@ export async function handleDisconnect(pool, game, winnerKey, game_name) {
     game.winner = winnerKey;
     game.forfeit = true;
 
+    const resolvedGameName = game_name ?? game.game_name;
+
     try {
         const winnerId = winnerKey === 'player1' ? game.player1_id : game.player2_id;
 
@@ -46,11 +48,127 @@ export async function handleDisconnect(pool, game, winnerKey, game_name) {
         );
 
         // Met à jour les stats des deux joueurs (gagnant ou non).
-        await updatePlayerStats(pool, game_name, game.player1_id, winnerKey === 'player1');
-        await updatePlayerStats(pool, game_name, game.player2_id, winnerKey === 'player2');
+        await updatePlayerStats(pool, resolvedGameName, game.player1_id, winnerKey === 'player1');
+        await updatePlayerStats(pool, resolvedGameName, game.player2_id, winnerKey === 'player2');
     } catch (err) {
         console.error("Erreur BDD Forfait:", err);
     }
+}
+
+/**
+ * The API endpoint to fetch the current game state, used by the frontend to update the visuals.
+ * It also handles the ping mechanism to detect disconnections.
+ * @param {*} app the Express app to define the route on
+ * @param {*} game_name the name of the game for database stats (e.g., "Tic Tac Toe")
+ * @param {*} activeGames the in-memory object that contains the active games
+ * @param {*} pool the PostgreSQL pool to perform database operations
+ */
+export function refresh_game_state(app, game_name, activeGames, pool) {
+
+    app.get('/api/game/:id/status', async (req, res) => {
+
+        const game = activeGames[req.params.id];
+        if (!game) {
+            return res.status(404).json({ error: "Partie introuvable" });
+        }
+
+        // Save the last ping :
+        if (req.session && req.session.user) {
+            const username = req.session.user.username;
+            if (username === game.player1) game.lastPingPlayer1 = Date.now();
+            if (username === game.player2) game.lastPingPlayer2 = Date.now();
+        }
+
+        if (game.player2 !== null && game.winner === null) {
+            const now = Date.now();
+            const TIMEOUT = 6000;
+
+            // If a player don't ping, considere it as deconnected :
+            if (game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT)) {
+
+                // player1 don't ping : player2 win by forfait :
+                await handleDisconnect(pool, game, 'player2', game_name);
+            } else if (game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT)) {
+
+                // player2 don't ping : player1 win by forfait :
+                await handleDisconnect(pool, game, 'player1', game_name);
+            }
+        }
+
+        res.json({
+            board: game.board, turn: game.turn, winner: game.winner,
+            player1: game.player1, player2: game.player2, forfeit: game.forfeit
+        });
+    });
+}
+
+/**
+ * The API endpoint to handle a move played by a player. 
+ * It checks if the move is valid, updates the game state,
+ * @param {*} app the Express app to define the route on
+ * @param {*} game_name the name of the game for database stats (e.g., "Tic Tac Toe")
+ * @param {*} activeGames the in-memory object that contains the active games
+ * @param {*} pool the PostgreSQL pool to perform database operations
+ */
+export function manage_move(app, game_name, activeGames, pool, checkWin) {
+
+    app.post('/api/game/:id/play', async (req, res) => {
+
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ success: false });
+        }
+
+        const game = activeGames[req.params.id];
+        const index = req.body.index;
+        const username = req.session.user.username;
+
+        const expectedPlayer = (game.turn === "player1") ? game.player1 : game.player2;
+
+        if (expectedPlayer !== username) {
+            return res.status(403).json({ success: false });
+        }
+
+        if (game.player2 === null) {
+            return res.status(400).json({ success: false });
+        }
+
+        if (game && game.board[index] === "" && game.winner === null) {
+            game.board[index] = game.turn;
+            game.winner = checkWin(game.board);
+
+            if (game.winner) {
+
+                // End of the game, we persist the result and the statistics of both players :
+                try {
+                    let winnerId = null;
+
+                    if (game.winner !== "Draw") {
+                        winnerId = game.winner === "player1" ? game.player1_id : game.player2_id;
+                    }
+
+                    await pool.query(
+                        `UPDATE live_matches SET status = 'finished', winner_id = $1, ended_at = CURRENT_TIMESTAMP WHERE id = $2`,
+                        [winnerId, game.dbId]
+                    );
+
+                    const isPlayer1Winner = game.winner === "player1";
+                    const isPlayer2Winner = game.winner === "player2";
+
+                    await updatePlayerStats(pool, game_name, game.player1_id, isPlayer1Winner);
+                    await updatePlayerStats(pool, game_name, game.player2_id, isPlayer2Winner);
+
+                } catch (err) {
+                    console.error("Erreur BDD fin de partie:", err);
+                }
+            } else {
+                game.turn = (game.turn === "player1") ? "player2" : "player1";
+            }
+
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ success: false });
+        }
+    });
 }
 
 /**
@@ -67,7 +185,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
     }
-    
+
     const username = req.session.user.username;
     const userId = req.session.user.id;
     let gameIdToJoin = null;
@@ -102,6 +220,7 @@ export async function match_making(req, res, activeGames, pool, game_name, route
     if (!gameIdToJoin) {
 
         const new_game = {
+            game_name,
             board: ["", "", "", "", "", "", "", "", ""], // TODO : make it generic for other games
             turn: "player1",
             winner: null,
@@ -125,9 +244,9 @@ export async function match_making(req, res, activeGames, pool, game_name, route
             // The DB id will also serve as a memory key :
             new_game.dbId = dbRes.rows[0].id;
             gameIdToJoin = (new_game.dbId).toString();
-        } 
-        catch (err) { 
-            console.error("Erreur DB insert match:", err); 
+        }
+        catch (err) {
+            console.error("Erreur DB insert match:", err);
         }
 
         activeGames[gameIdToJoin] = new_game;
@@ -180,14 +299,14 @@ export function cleanup(activeGames, pool) {
             try {
                 if (!player1Present && player2Present) {
                     // player2 wins by forfeit
-                    if (!game.forfeit) await handleDisconnect(pool, game, 'player2', undefined);
+                    if (!game.forfeit) await handleDisconnect(pool, game, 'player2', game.game_name);
                     delete activeGames[id];
                     continue;
                 }
 
                 if (!player2Present && player1Present) {
                     // player1 wins by forfeit
-                    if (!game.forfeit) await handleDisconnect(pool, game, 'player1', undefined);
+                    if (!game.forfeit) await handleDisconnect(pool, game, 'player1', game.game_name);
                     delete activeGames[id];
                     continue;
                 }

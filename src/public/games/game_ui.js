@@ -26,6 +26,10 @@ export function formatPlayerLabel(role, playerName, currentUser, waitingText = "
     return `${role} : ${playerName} ${isCurrentUser(playerName, currentUser) ? '(You)' : ''}`;
 }
 
+function defaultGetCellMark(mark) {
+    return mark ?? "";
+}
+
 /**
  * The function update the visuals of the board, the player labels 
  * and the match status based on the current game data.
@@ -34,8 +38,24 @@ export function formatPlayerLabel(role, playerName, currentUser, waitingText = "
  * @param {*} game_name the name of the game, used for constructing redirect URLs
  * @param {*} cell_mark the mark used by the current player (e.g., "X" or "O"),
  * used to determine cell colors
+ * @param {*} ui the DOM references and helpers needed to render the board
  */
-function updateBoardVisuals(data, game_name, cell_mark) {
+function updateBoardVisuals(data, game_name, cell_mark, ui = {}) {
+
+    const {
+        cells,
+        statusText,
+        restartBtn,
+        player1Display,
+        player2Display,
+        currentUser,
+        gameId,
+        getCellMark = defaultGetCellMark,
+    } = ui;
+
+    if (!cells) {
+        return;
+    }
 
     cells.forEach((cell, index) => {
         const cellMark = getCellMark(data.board[index]);
@@ -43,12 +63,12 @@ function updateBoardVisuals(data, game_name, cell_mark) {
         cell.style.color = cellMark === cell_mark ? "#20c997" : "#ffc107";
     });
 
-    renderPlayerLabels(player1Display, player2Display, data, CURRENT_USER);
+    renderPlayerLabels(player1Display, player2Display, data, currentUser);
 
-    renderMatchStatus(statusText, restartBtn, data, CURRENT_USER, {
+    renderMatchStatus(statusText, restartBtn, data, currentUser, {
         forfeitRedirectUrl: '/games/' + game_name,
         restartAction: async () => {
-            await fetch(`/api/game/${GAME_ID}/restart`, { method: 'POST' });
+            await fetch(`/api/game/${gameId}/restart`, { method: 'POST' });
         },
     });
 }
@@ -65,29 +85,31 @@ function updateBoardVisuals(data, game_name, cell_mark) {
  * @param {*} game_name the name of the game, used for constructing redirect URLs
  * @param {*} cell_mark the mark used by the current player (e.g., "X" or "O"),
  * used to determine cell colors
+ * @param {*} ui the DOM references and helpers needed to render the board
  */
-export async function fetchAndUpdate(reloadOnJoin = true, game_name, cell_mark) {
+export async function fetchAndUpdate(reloadOnJoin = true, game_name, cell_mark, ui = {}) {
     try {
-        const response = await fetch(`/api/game/${GAME_ID}/status`);
+        const response = await fetch(`/api/game/${ui.gameId}/status`);
         if (response.ok) {
             const data = await response.json();
+            const state = ui.state ?? (ui.state = { isFirstFetch: true, prevPlayer2: null });
 
             // First fetch only: seed state without triggering reload
-            if (isFirstFetch) {
-                prevPlayer2 = data.player2 || null;
-                updateBoardVisuals(data, game_name, cell_mark);
-                isFirstFetch = false;
+            if (state.isFirstFetch) {
+                state.prevPlayer2 = data.player2 || null;
+                updateBoardVisuals(data, game_name, cell_mark, ui);
+                state.isFirstFetch = false;
                 return;
             }
 
             // Detect when player2 just joined (was null/absent, now present)
-            if (!prevPlayer2 && data.player2 && reloadOnJoin) {
+            if (!state.prevPlayer2 && data.player2 && reloadOnJoin) {
                 window.location.reload();
                 return;
             }
 
-            prevPlayer2 = data.player2 || null;
-            updateBoardVisuals(data, game_name, cell_mark);
+            state.prevPlayer2 = data.player2 || null;
+            updateBoardVisuals(data, game_name, cell_mark, ui);
         }
     } catch (err) {
         console.error("Error occurred while fetching game status:", err);
