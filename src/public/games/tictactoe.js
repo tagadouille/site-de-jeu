@@ -1,3 +1,7 @@
+import { renderMatchStatus, renderPlayerLabels } from './game_ui.js';
+
+
+
 const cells = document.querySelectorAll('.cell');
 const statusText = document.getElementById('statusText');
 const restartBtn = document.getElementById('restartBtn');
@@ -5,17 +9,27 @@ const player1Display = document.getElementById('player1Display');
 const player2Display = document.getElementById('player2Display');
 
 /**
- * Return the mark of the cell based on the player identifier.
- * @param {player1 | player2} mark 
- * @returns 
+ * The function returns the symbol to display in a cell based on the mark value.
+ * @param {*} mark the mark in the cell ("player1", "player2" or "")
+ * @returns the symbol to display in the cell ("X", "O" or "")
  */
 function getCellMark(mark) {
-    if (mark === "player1") return "X";
-    if (mark === "player2") return "O";
+    if (mark === "player1") {
+        return "X";
+    }
+
+    if (mark === "player2") {
+        return "O";
+    }
     return mark;
 }
 
-
+/**
+ * The function update the visuals of the board, the player labels 
+ * and the match status based on the current game data.
+ * @param {*} data the current game data, which includes the board state, 
+ * player information, turn information, winner status, etc.
+ */
 function updateBoardVisuals(data) {
 
     cells.forEach((cell, index) => {
@@ -24,53 +38,27 @@ function updateBoardVisuals(data) {
         cell.style.color = cellMark === "X" ? "#20c997" : "#ffc107";
     });
 
+    renderPlayerLabels(player1Display, player2Display, data, CURRENT_USER);
 
-    player1Display.textContent = `player1 : ${data.player1} ${data.player1 === CURRENT_USER ? '(You)' : ''}`;
-    if (data.player2) {
-        player2Display.textContent = `player2 : ${data.player2} ${data.player2 === CURRENT_USER ? '(You)' : ''}`;
-    } else {
-        player2Display.textContent = `player2 : ⏳ Waiting for an opponent...`;
-    }
-
-
-    const isMyTurn = (data.turn === "player1" && data.player1 === CURRENT_USER) ||
-        (data.turn === "player2" && data.player2 === CURRENT_USER);
-
-    if (!data.player2) {
-        statusText.textContent = "⏳ Waiting for an opponent...";
-        restartBtn.style.display = "none";
-    } else if (data.winner === "Draw") {
-        statusText.textContent = "Draw ! 🤝";
-        restartBtn.style.display = "inline-block";
-    } else if (data.winner) {
-        const winnerName = data.winner === "player1" ? data.player1 : data.player2;
-
-        if (data.forfeit) {
-            statusText.textContent = winnerName === CURRENT_USER ? "Opponent forfeited! You win 🏆" : `${winnerName} won by forfeit...`;
-            restartBtn.textContent = "Search for another opponent";
-            restartBtn.style.display = "inline-block";
-            restartBtn.onclick = () => window.location.href = '/games/tictactoe';
-        } else {
-            statusText.textContent = winnerName === CURRENT_USER ? "🎉 You won!" : `💀 ${winnerName} won...`;
-            restartBtn.textContent = "Restart";
-            restartBtn.style.display = "inline-block";
-            restartBtn.onclick = async () => {
-                await fetch(`/api/game/${GAME_ID}/restart`, { method: 'POST' });
-            };
-        }
-    } else {
-        statusText.textContent = isMyTurn ? "👉 It's your turn!" : `⏳ It's the opponent's turn...`;
-        restartBtn.style.display = "none";
-    }
+    renderMatchStatus(statusText, restartBtn, data, CURRENT_USER, {
+        forfeitRedirectUrl: '/games/tictactoe',
+        restartAction: async () => {
+            await fetch(`/api/game/${GAME_ID}/restart`, { method: 'POST' });
+        },
+    });
 }
 
 let isFirstFetch = true;
 let prevPlayer2 = null;
 
 /**
- * The function fetches the game status and updates the board visuals. 
- * It also detects when an opponent joins for the first time and reloads the page to reflect the new state.
- * @param {boolean} reloadOnJoin - A flag to determine whether to reload the page when an opponent joins. Defaults to true.
+ * The function fetches the current game status from the server and updates the board visuals,
+ * player labels and match status accordingly. It also detects when a second player joins the game
+ * and triggers a page reload to update the UI with the new player's information.
+ * @param {*} reloadOnJoin a boolean flag that determines whether to trigger 
+ * a page reload when a second player joins the game. 
+ * This is typically set to true for regular status updates, but can be set to 
+ * false for the initial fetch to avoid unnecessary reloads.
  */
 async function fetchAndUpdate(reloadOnJoin = true) {
     try {
@@ -105,6 +93,7 @@ fetchAndUpdate(true);
 // Poll regularly and allow reload when an opponent joins
 setInterval(() => fetchAndUpdate(true), 500);
 
+// Handle cell clicks to make a move :
 cells.forEach(cell => {
     cell.addEventListener('click', async function () {
         if (this.textContent !== "") return;
@@ -117,6 +106,7 @@ cells.forEach(cell => {
     });
 });
 
+// Handle restart button click to restart the game :
 restartBtn.addEventListener('click', async () => {
     await fetch(`/api/game/${GAME_ID}/restart`, {
         method: 'POST'
