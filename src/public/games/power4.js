@@ -10,28 +10,20 @@ const player2Display = document.getElementById('player2Display');
 
 /**
  * The function returns the symbol to display in a cell based on the mark value.
- * @param {*} mark the mark in the cell ("player1", "player2" or "")
- * @returns the symbol to display in the cell ("X", "O" or "")
+ * @returns the symbol to display in the cell 
  */
-function getCellMark(mark) {
-    if (mark === "player1") {
-        return "X";
-    }
-
-    if (mark === "player2") {
-        return "O";
-    }
-    return mark;
+function getCellMark() {
+    return "O";
 }
 
 let isFirstFetch = true;
 let prevPlayer2 = null;
 
 // Initial fetch to seed state
-fetchAndUpdate(true, "tictactoe", "X");
+fetchAndUpdate(true, "power4", "O");
 
 // Poll regularly and allow reload when an opponent joins
-setInterval(() => fetchAndUpdate(true, "tictactoe", "X"), 500);
+setInterval(() => fetchAndUpdate(true, "power4", "O"), 500);
 
 // Handle cell clicks to make a move :
 cells.forEach(cell => {

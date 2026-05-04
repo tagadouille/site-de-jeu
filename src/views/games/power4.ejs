@@ -1,0 +1,59 @@
+
+<%- include('../partials/header.ejs', {
+    title : "Power 4",
+    script : "/games/power4.js",
+    stylesheet_html: '<link rel="stylesheet" href="/css-styles/power4.css">'
+}) %>
+
+<script>
+    const GAME_ID = "<%= gameId %>";
+    const CURRENT_USER = "<%= username %>";
+</script>
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Power 4</title>
+</head>
+<body>
+
+    <div class="container text-center my-5">
+    <h1 class="mb-4">Power 4</h1>
+    
+    <div class="row mb-3 fw-bold w-75 mx-auto">
+        <div id="player1Display" class="player-badge col-12 col-lg-6 mb-2">player1 : ...</div>
+        <div id="player2Display" class="player-badge col-12 col-lg-6">player2 : Waiting for an opponent...</div>
+    </div>
+
+    <div class="status-text mb-4 tracking-wide" id="statusText">Waiting for players...</div>
+    
+    <div class = "row d-flex justify-content-center align-items-center">
+
+        <div class = "col-lg-6 col-mb-12">
+            <%- include('chat.ejs', {
+                user_id: user_id,
+                receiver_id: receiver_id,
+                match_id: gameId,
+            }) %>
+        </div>
+
+        <div class = "col-lg-6 col-mb-12">
+            <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
+
+                <% for (let index = 0; index < gridSize; index++) {
+                    <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="<%=index%>"></div>
+                } %>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <button class="btn btn-lg px-5 fw-bold text-white shadow-sm restart-btn" id="restartBtn">Restart</button>
+    </div>
+</div>
+        
+</body>
+</html>
+
+<%- include('../partials/footer') %>

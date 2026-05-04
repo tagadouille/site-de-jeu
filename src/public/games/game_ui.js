@@ -27,6 +27,74 @@ export function formatPlayerLabel(role, playerName, currentUser, waitingText = "
 }
 
 /**
+ * The function update the visuals of the board, the player labels 
+ * and the match status based on the current game data.
+ * @param {*} data the current game data, which includes the board state, 
+ * player information, turn information, winner status, etc.
+ * @param {*} game_name the name of the game, used for constructing redirect URLs
+ * @param {*} cell_mark the mark used by the current player (e.g., "X" or "O"),
+ * used to determine cell colors
+ */
+function updateBoardVisuals(data, game_name, cell_mark) {
+
+    cells.forEach((cell, index) => {
+        const cellMark = getCellMark(data.board[index]);
+        cell.textContent = cellMark;
+        cell.style.color = cellMark === cell_mark ? "#20c997" : "#ffc107";
+    });
+
+    renderPlayerLabels(player1Display, player2Display, data, CURRENT_USER);
+
+    renderMatchStatus(statusText, restartBtn, data, CURRENT_USER, {
+        forfeitRedirectUrl: '/games/' + game_name,
+        restartAction: async () => {
+            await fetch(`/api/game/${GAME_ID}/restart`, { method: 'POST' });
+        },
+    });
+}
+
+/**
+ * The function fetches the current game status from the server and updates the board visuals,
+ * player labels and match status accordingly. It also detects when a second player joins the game
+ * and triggers a page reload to update the UI with the new player's information.
+ * @param {*} reloadOnJoin a boolean flag that determines whether to trigger 
+ * a page reload when a second player joins the game. 
+ * This is typically set to true for regular status updates, but can be set to 
+ * false for the initial fetch to avoid unnecessary reloads.
+ * 
+ * @param {*} game_name the name of the game, used for constructing redirect URLs
+ * @param {*} cell_mark the mark used by the current player (e.g., "X" or "O"),
+ * used to determine cell colors
+ */
+export async function fetchAndUpdate(reloadOnJoin = true, game_name, cell_mark) {
+    try {
+        const response = await fetch(`/api/game/${GAME_ID}/status`);
+        if (response.ok) {
+            const data = await response.json();
+
+            // First fetch only: seed state without triggering reload
+            if (isFirstFetch) {
+                prevPlayer2 = data.player2 || null;
+                updateBoardVisuals(data, game_name, cell_mark);
+                isFirstFetch = false;
+                return;
+            }
+
+            // Detect when player2 just joined (was null/absent, now present)
+            if (!prevPlayer2 && data.player2 && reloadOnJoin) {
+                window.location.reload();
+                return;
+            }
+
+            prevPlayer2 = data.player2 || null;
+            updateBoardVisuals(data, game_name, cell_mark);
+        }
+    } catch (err) {
+        console.error("Error occurred while fetching game status:", err);
+    }
+}
+
+/**
  * the function updates the player labels and the match status
  *  text based on the current game data.
  * @param {*} player1Display the DOM element for displaying player 1's information
@@ -39,6 +107,7 @@ export function formatPlayerLabel(role, playerName, currentUser, waitingText = "
  * (e.g., "Waiting for an opponent...")
  */
 export function renderPlayerLabels(player1Display, player2Display, data, currentUser, waitingText = "Waiting for an opponent...") {
+    
     if (player1Display) {
         player1Display.textContent = formatPlayerLabel('player1', data.player1, currentUser, waitingText);
     }
