@@ -2,7 +2,7 @@
 <%- include('../partials/header.ejs', {
     title : "Power 4",
     script : "/games/power4.js",
-    stylesheet_html: '<link rel="stylesheet" href="/css-styles/power4.css">'
+    stylesheet_html: '<link rel="stylesheet" href="/css-styles/games-styles/power4.css">'
 }) %>
 
 <script>
@@ -38,9 +38,11 @@
         </div>
 
         <div class = "col-lg-6 col-mb-12">
-            <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg">
-                <% for (let index = 0; index < gridSize; index++) { %>
-                    <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="<%= index %>"></div>
+            <div class="board d-inline-grid gap-2 p-3 rounded-4 shadow-lg" style="--cols:<%= gridCols %>; --cell-size:60px;">
+                <% for (let r = 0; r < gridRows; r++) { %>
+                    <% for (let c = 0; c < gridCols; c++) { %>
+                        <div class="cell rounded-3 d-flex justify-content-center align-items-center" data-index="<%= r * gridCols + c %>"></div>
+                    <% } %>
                 <% } %>
             </div>
         </div>

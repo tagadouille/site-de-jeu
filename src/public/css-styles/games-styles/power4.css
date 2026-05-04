@@ -1,0 +1,65 @@
+
+:root {
+    --bg-board: #1a0b2e;
+    --bg-cell: #2d1b4e;
+    --bg-cell-hover: #3e256b;
+    --btn-color: #20c997;  
+    --btn-hover: #1aa179;
+}
+
+.status-text {
+    color: var(--bg-board);
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.cell {
+    background: var(--bg-cell);
+    font-size: 4rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 7), 1fr);
+    grid-auto-rows: var(--cell-size, 60px);
+    gap: 0.5rem;
+}
+
+.board {
+    background: var(--bg-board);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cell {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+}
+
+.cell:hover:empty { background: var(--bg-cell-hover); }
+.cell:active { transform: scale(0.95); }
+
+.restart-btn {
+    background-color: var(--btn-color) !important;
+}
+
+.restart-btn:hover {
+    background-color: var(--btn-hover) !important; 
+}
+
+.player-badge {
+    font-size: 1.25rem;
+    min-width: 200px;
+}
+
+#player1Display {
+    color: #1aa179;
+}
+
+#player2Display {
+    color: #ffc107;
+}

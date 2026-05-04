@@ -17,6 +17,7 @@ import { runTicTacToe } from "./games/tictactoe.js";
 import { runChat } from "./games/chat_backend.js";
 import { runStats } from "./profile/stats.js";
 import { runSeach } from "./search_backend.js";
+import { runPower4 } from "./games/power4.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 
@@ -74,6 +75,7 @@ runProfile(app_obj);
 runUsers(app_obj);
 runLogOut(app_obj);
 runTicTacToe(app_obj);
+runPower4(app_obj);
 runChat(app_obj);
 runStats(app_obj);
 runSeach(app_obj);

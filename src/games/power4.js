@@ -1,6 +1,8 @@
 import { activeGames, match_making, handleDisconnect, updatePlayerStats, cleanup, refresh_game_state, manage_move } from "./multiplayer_handler.js";
 
-const GRID_SIZE = 6; // 6 rows and columns
+const GRID_ROWS = 6; // 6 rows
+const GRID_COLS = 7; // 7 columns
+const GRID_SIZE = GRID_ROWS * GRID_COLS;
 
 
 /**
@@ -56,6 +58,8 @@ export function runPower4(server) {
             is_connect: true, 
             is_display_buttons: true,
             gridSize : GRID_SIZE,
+            gridCols : GRID_COLS,
+            gridRows : GRID_ROWS,
             gameId: req.params.id,              
             username: req.session.user.username,
             user_id : req.session.user.id,
