@@ -31,6 +31,49 @@ function defaultGetCellMark(mark) {
 }
 
 /**
+ * Sets up the common board polling and click wiring for a game page.
+ * @param {*} options configuration for the game page bootstrap
+ * @returns the UI references and state used by fetchAndUpdate
+ */
+export function initGamePage(options = {}) {
+    const {
+        gameName,
+        cellMark,
+        getCellMark = defaultGetCellMark,
+        onCellClick = null,
+        reloadOnJoin = true,
+        pollIntervalMs = 500,
+    } = options;
+
+    const cells = document.querySelectorAll('.cell');
+    const ui = {
+        cells,
+        statusText: document.getElementById('statusText'),
+        restartBtn: document.getElementById('restartBtn'),
+        player1Display: document.getElementById('player1Display'),
+        player2Display: document.getElementById('player2Display'),
+        currentUser: window.CURRENT_USER,
+        gameId: window.GAME_ID,
+        state: { isFirstFetch: true, prevPlayer2: null },
+        getCellMark,
+    };
+
+    fetchAndUpdate(reloadOnJoin, gameName, cellMark, ui);
+
+    setInterval(() => fetchAndUpdate(reloadOnJoin, gameName, cellMark, ui), pollIntervalMs);
+
+    if (onCellClick) {
+        cells.forEach((cell) => {
+            cell.addEventListener('click', async function () {
+                await onCellClick(this, ui);
+            });
+        });
+    }
+
+    return ui;
+}
+
+/**
  * The function update the visuals of the board, the player labels 
  * and the match status based on the current game data.
  * @param {*} data the current game data, which includes the board state, 
