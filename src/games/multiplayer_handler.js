@@ -13,6 +13,12 @@ export async function updatePlayerStats(pool, game_name, userId, isWinner) {
 
     const winsToAdd = isWinner ? 1 : 0;
 
+    // Defensive: if userId is null/undefined, skip updating stats to avoid DB NOT NULL violations
+    if (userId == null) {
+        console.warn("Skipping updatePlayerStats: missing userId", { game_name, userId, isWinner });
+        return;
+    }
+
     const query = `
         INSERT INTO played_games (user_id, game_name, number_of_wins, number_of_matches)
         VALUES ($1, $2, $3, 1)
@@ -47,9 +53,18 @@ export async function handleDisconnect(pool, game, winnerKey, game_name) {
             [winnerId, game.dbId]
         );
 
-        // Met à jour les stats des deux joueurs (gagnant ou non).
-        await updatePlayerStats(pool, resolvedGameName, game.player1_id, winnerKey === 'player1');
-        await updatePlayerStats(pool, resolvedGameName, game.player2_id, winnerKey === 'player2');
+        // Met à jour les stats des deux joueurs (gagnant ou non) uniquement si leur ID est présent.
+        if (game.player1_id != null) {
+            await updatePlayerStats(pool, resolvedGameName, game.player1_id, winnerKey === 'player1');
+        } else {
+            console.warn('handleDisconnect: player1_id missing, skip stats update', { dbId: game.dbId });
+        }
+
+        if (game.player2_id != null) {
+            await updatePlayerStats(pool, resolvedGameName, game.player2_id, winnerKey === 'player2');
+        } else {
+            console.warn('handleDisconnect: player2_id missing, skip stats update', { dbId: game.dbId });
+        }
     } catch (err) {
         console.error("Erreur BDD Forfait:", err);
     }
@@ -112,14 +127,27 @@ export function refresh_game_state(app, game_name, activeGames, pool) {
  */
 export function manage_move(app, game_name, activeGames, pool, checkWin) {
 
-    app.post('/api/game/:id/play', async (req, res) => {
+    app.post('/api/game/:id/play', async (req, res, next) => {
 
         if (!req.session || !req.session.user) {
             return res.status(401).json({ success: false });
         }
 
         const game = activeGames[req.params.id];
-        const index = req.body.index;
+
+        // If the game does not exist or belongs to a different game type,
+        // delegate to the next handler so specific game modules (e.g., Power 4)
+        // can implement custom move logic.
+        // Extra guard: ensure the in-memory board shape matches the expected game (Tic Tac Toe uses 9 cells).
+        if (!game || game.game_name !== game_name || !Array.isArray(game.board) || game.board.length !== 9) {
+            return next();
+        }
+
+        const index = Number(req.body.index);
+        // Validate index for tic-tac-toe board bounds
+        if (!Number.isInteger(index) || index < 0 || index >= game.board.length) {
+            return res.status(400).json({ success: false });
+        }
         const username = req.session.user.username;
 
         const expectedPlayer = (game.turn === "player1") ? game.player1 : game.player2;

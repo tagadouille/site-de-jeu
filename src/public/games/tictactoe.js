@@ -69,9 +69,3 @@ cells.forEach(cell => {
     });
 });
 
-// Handle restart button click to restart the game :
-restartBtn.addEventListener('click', async () => {
-    await fetch(`/api/game/${gameId}/restart`, {
-        method: 'POST'
-    });
-});

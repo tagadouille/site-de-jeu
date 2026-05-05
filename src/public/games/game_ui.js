@@ -90,6 +90,14 @@ function updateBoardVisuals(data, game_name, cell_mark, ui = {}) {
 export async function fetchAndUpdate(reloadOnJoin = true, game_name, cell_mark, ui = {}) {
     try {
         const response = await fetch(`/api/game/${ui.gameId}/status`);
+
+        // If the server no longer has the in-memory game, redirect back to games list
+        if (response.status === 404) {
+            console.warn(`Game ${ui.gameId} not found on server; redirecting to /games/${game_name}`);
+            window.location.href = `/games/${game_name}`;
+            return;
+        }
+
         if (response.ok) {
             const data = await response.json();
             const state = ui.state ?? (ui.state = { isFirstFetch: true, prevPlayer2: null });
@@ -223,7 +231,12 @@ export function renderMatchStatus(statusText, restartBtn, data, currentUser, opt
             return;
         }
 
-        setRestartButton(restartText, true, restartAction);
+            setRestartButton(restartText, true, async () => {
+                if (restartAction) {
+                    await restartAction();
+                }
+                window.location.reload();
+            });
         return;
     }
 

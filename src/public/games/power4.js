@@ -52,19 +52,20 @@ setInterval(() => fetchAndUpdate(true, "power4", "O", {
 // Handle cell clicks to make a move :
 cells.forEach(cell => {
     cell.addEventListener('click', async function () {
-        if (this.textContent !== "") return;
+        const cellIndex = parseInt(this.getAttribute('data-index'));
 
-        await fetch(`/api/game/${gameId}/play`, {
+        const response = await fetch(`/api/game/${gameId}/play`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ index: this.getAttribute('data-index') })
+            body: JSON.stringify({ index: cellIndex })
         });
+
+        if (!response.ok) {
+            const payload = await response.json().catch(() => null);
+            if (payload?.message) {
+                console.warn(payload.message);
+            }
+        }
     });
 });
 
-// Handle restart button click to restart the game :
-restartBtn.addEventListener('click', async () => {
-    await fetch(`/api/game/${gameId}/restart`, {
-        method: 'POST'
-    });
-});
