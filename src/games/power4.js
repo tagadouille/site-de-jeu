@@ -300,17 +300,6 @@ export function runPower4(server) {
         // Extract column from clicked index
         const { col } = getRowCol(clickedIndex);
 
-        // Debug: log clicked index and current column contents (top->bottom)
-        try {
-            const colCells = [];
-            for (let r = 0; r < GRID_ROWS; r++) {
-                colCells.push(game.board[r * GRID_COLS + col]);
-            }
-            console.log(`[Power4 DEBUG] Play request: clickedIndex=${clickedIndex}, col=${col}, column(top->bottom)=`, colCells);
-        } catch (e) {
-            console.warn('[Power4 DEBUG] Could not log column state', e);
-        }
-
         // Find valid placement position (with gravity)
         const validIndex = getValidPlacement(game.board, col);
 
@@ -321,24 +310,8 @@ export function runPower4(server) {
 
         // Place the piece at the valid position
         game.board[validIndex] = game.turn;
-        // Debug: log placement result for the column (top->bottom)
-        try {
-            const placedCol = [];
-            for (let r = 0; r < GRID_ROWS; r++) placedCol.push(game.board[r * GRID_COLS + col]);
-            console.log(`[Power4 DEBUG] Placed at index=${validIndex} (row=${Math.floor(validIndex/GRID_COLS)}, col=${col}), column after place(top->bottom)=`, placedCol);
-        } catch (e) {
-            console.warn('[Power4 DEBUG] Could not log column after place', e);
-        }
-        game.winner = checkWin(game.board, validIndex);
 
-        // Debug log to help detect why victory may not be detected in runtime
-        if (game.winner) {
-            console.log(`[Power4] Winner detected: ${game.winner} at index ${validIndex} (gameId=${req.params.id})`);
-        } else {
-            // Log last placed piece context for debug (limited verbosity)
-            const rowcol = getRowCol(validIndex);
-            console.log(`[Power4] No winner after move by ${username} at col=${rowcol.col}, row=${rowcol.row} (index=${validIndex})`);
-        }
+        game.winner = checkWin(game.board, validIndex);
 
         if (game.winner) {
             // Game end: persist result and update statistics
@@ -381,11 +354,9 @@ export function runPower4(server) {
         }
         if (game) {
             // Initialize board with 42 empty cells (6 rows x 7 columns)
-            console.log(`[Power4 DEBUG] Restarting game id=${req.params.id}, previous dbId=${game.dbId}`);
             game.board = Array(GRID_SIZE).fill("");
             // Normalize to ensure dense array and avoid undefined entries from prior state
             game.board = normalizeBoard(game.board);
-            console.log(`[Power4 DEBUG] Board reset, length=${game.board.length}`);
             game.turn = "player1";
             game.winner = null;
             game.forfeit = false;
