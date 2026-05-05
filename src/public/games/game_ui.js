@@ -58,9 +58,10 @@ function updateBoardVisuals(data, game_name, cell_mark, ui = {}) {
     }
 
     cells.forEach((cell, index) => {
-        const cellMark = getCellMark(data.board[index]);
+        const boardMark = data.board[index];
+        const cellMark = getCellMark(boardMark);
         cell.textContent = cellMark;
-        cell.style.color = cellMark === cell_mark ? "#20c997" : "#ffc107";
+        cell.style.color = boardMark === "player1" ? "#20c997" : boardMark === "player2" ? "#ffc107" : "";
     });
 
     renderPlayerLabels(player1Display, player2Display, data, currentUser);
