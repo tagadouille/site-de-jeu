@@ -1,4 +1,4 @@
-import { activeGames, handleDisconnect, updatePlayerStats, cleanup, refresh_game_state } from "./multiplayer_handler.js";
+import { activeGames, match_making, updatePlayerStats, cleanup, refresh_game_state, restartGame } from "./multiplayer_handler.js";
 
 const GRID_ROWS = 6; // 6 rows
 const GRID_COLS = 7; // 7 columns
@@ -136,19 +136,6 @@ function checkWin(board, lastMoveIndex) {
 }
 
 /**
- * Ensure the board is a dense array of length GRID_SIZE with no undefined slots.
- * Preserves existing non-undefined values.
- */
-function normalizeBoard(board) {
-    const normalized = Array(GRID_SIZE).fill("");
-    if (!board) return normalized;
-    for (let i = 0; i < Math.min(board.length, GRID_SIZE); i++) {
-        if (board[i] !== undefined) normalized[i] = board[i];
-    }
-    return normalized;
-}
-
-/**
  * Backend of the Power 4 game
  *
  * This module handles:
@@ -160,74 +147,6 @@ function normalizeBoard(board) {
  *
  * @param {object} server - Server object containing `app` and `pool`.
  */
-async function matchmaking_power4(req, res, activeGames, pool) {
-    if (!req.session || !req.session.user) {
-        return res.redirect('/signin');
-    }
-
-    const username = req.session.user.username;
-    const userId = req.session.user.id;
-    let gameIdToJoin = null;
-
-    // Try to join an existing game waiting for a second player
-    for (const [id, game] of Object.entries(activeGames)) {
-        if (game.player2 === null && game.player1 !== username) {
-            gameIdToJoin = id;
-            game.player2 = username;
-            game.player2_id = userId;
-            game.lastPingPlayer2 = Date.now();
-
-            try {
-                const updateQuery = `UPDATE live_matches SET player2_id = $1 WHERE id = $2`;
-                await pool.query(updateQuery, [userId, game.dbId]);
-            } catch (err) {
-                console.error("Erreur DB update match:", err);
-            }
-            break;
-        }
-        // If player already created a game and is waiting
-        else if (game.player1 === username && game.player2 === null) {
-            gameIdToJoin = id;
-            break;
-        }
-    }
-
-    // Create a new game if none available
-    if (!gameIdToJoin) {
-        const new_game = {
-            game_name: 'Power 4',
-            board: Array(GRID_SIZE).fill(""), // Initialize with correct size (42 cells)
-            turn: "player1",
-            winner: null,
-            forfeit: false,
-            player1: username,
-            player1_id: userId,
-            player2: null,
-            player2_id: null,
-            lastPingPlayer1: Date.now(),
-            lastPingPlayer2: null,
-            dbId: null,
-        };
-
-        try {
-            const insertQuery = `
-                INSERT INTO live_matches (game_name, player1_id, status) 
-                VALUES ($1, $2, 'ongoing') RETURNING id
-            `;
-            const dbRes = await pool.query(insertQuery, ['Power 4', userId]);
-            new_game.dbId = dbRes.rows[0].id;
-            gameIdToJoin = (new_game.dbId).toString();
-        } catch (err) {
-            console.error("Erreur DB insert match:", err);
-            return res.status(500).json({ error: "Erreur de base de données" });
-        }
-
-        activeGames[gameIdToJoin] = new_game;
-    }
-
-    res.redirect(`/games/power4/${gameIdToJoin}`);
-}
-
 export function runPower4(server) {
 
     let app = server.app;
@@ -235,7 +154,7 @@ export function runPower4(server) {
 
     // Game main menu : join an existant game if possible, else create a new :
     app.get('/games/power4', async (req, res) => {
-        await matchmaking_power4(req, res, activeGames, pool);
+        await match_making(req, res, activeGames, pool, 'Power 4', 'power4', { boardSize: GRID_SIZE });
     });
 
     // Game page : transmit useful information to the front and the chat :
@@ -243,11 +162,6 @@ export function runPower4(server) {
         if (!req.session || !req.session.user) return res.redirect('/signin');
 
         const game = activeGames[req.params.id];
-
-        // Defensive: ensure board is normalized (no sparse arrays/undefined entries)
-        if (game) {
-            game.board = normalizeBoard(game.board);
-        }
 
         if (!game) {
             return res.redirect('/games/power4');
@@ -257,8 +171,6 @@ export function runPower4(server) {
         const receiver_id = req.session.user.username === game.player1
             ? game.player2_id
             : game.player1_id;
-
-        //TODO Cas intrus
 
         res.render("games/power4.ejs", {
             is_connect: true,
@@ -346,33 +258,7 @@ export function runPower4(server) {
 
     // Reinitialize the grid without deleting the game if the two players are always present :
     app.post('/api/game/:id/restart', async (req, res) => {
-
-        const game = activeGames[req.params.id];
-
-        if (!game || game.forfeit || game.player2 === null) {
-            return res.status(400).json({ success: false, message: "Impossible de relancer." });
-        }
-        if (game) {
-            // Initialize board with 42 empty cells (6 rows x 7 columns)
-            game.board = Array(GRID_SIZE).fill("");
-            // Normalize to ensure dense array and avoid undefined entries from prior state
-            game.board = normalizeBoard(game.board);
-            game.turn = "player1";
-            game.winner = null;
-            game.forfeit = false;
-            game.lastPingPlayer1 = Date.now();
-            game.lastPingPlayer2 = Date.now();
-
-            try {
-                const insertQuery = `
-                    INSERT INTO live_matches (game_name, player1_id, player2_id, status) 
-                    VALUES ('Power 4', $1, $2, 'ongoing') RETURNING id
-                `;
-                const dbRes = await pool.query(insertQuery, [game.player1_id, game.player2_id]);
-                game.dbId = dbRes.rows[0].id;
-            } catch (err) { console.error("Erreur DB restart:", err); }
-        }
-        res.json({ success: true });
+        await restartGame(req, res, activeGames, pool, 'Power 4', { boardSize: GRID_SIZE });
     });
 
     // Periodic cleanup of old games :

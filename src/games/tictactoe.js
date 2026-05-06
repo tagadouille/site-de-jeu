@@ -1,4 +1,4 @@
-import { activeGames, match_making, handleDisconnect, updatePlayerStats, cleanup, refresh_game_state, manage_move } from "./multiplayer_handler.js";
+import { activeGames, match_making, cleanup, refresh_game_state, manage_move, restartGame } from "./multiplayer_handler.js";
 
 const winConditions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -10,7 +10,8 @@ const winConditions = [
  * Determine the current state of the grid
  *
  * @param {string[]} board - Board of 9 cells containing "", "player1" or "player2".
- * @returns {"player1"|"player2"|"Draw"|null} The winner, a draw or `null` if the game is still ongoing.
+ * @returns {"player1"|"player2"|"Draw"|null} The winner, a draw or `null` 
+ * if the game is still ongoing.
  */
 function checkWin(board) {
     for (let i = 0; i < winConditions.length; i++) {
@@ -46,7 +47,10 @@ export function runTicTacToe(server) {
 
     // Game page : transmit useful information to the front and the chat :
     app.get('/games/tictactoe/:id', (req, res) => {
-        if (!req.session || !req.session.user) return res.redirect('/signin');
+
+        if (!req.session || !req.session.user) {
+            return res.redirect('/signin');
+        }
         
         const game = activeGames[req.params.id];
 
@@ -58,8 +62,6 @@ export function runTicTacToe(server) {
         const receiver_id = req.session.user.username === game.player1
             ? game.player2_id
             : game.player1_id;
-
-        //TODO Cas intrus
 
         res.render("games/tictactoe.ejs", { 
             is_connect: true, 
@@ -78,29 +80,8 @@ export function runTicTacToe(server) {
     manage_move(app, 'Tic Tac Toe', activeGames, pool, checkWin);
 
     // Reinitialize the grid without deleting the game if the two players are always presents :
-    app.post('/api/game/:id/restart', async(req, res) => {
-        const game = activeGames[req.params.id];
-        if (!game || game.forfeit || game.player2 === null) {
-            return res.status(400).json({ success: false, message: "Impossible de relancer." });
-        }
-        if (game) {
-            game.board = ["", "", "", "", "", "", "", "", ""];
-            game.turn = "player1"; 
-            game.winner = null;
-            game.forfeit = false;
-            game.lastPingPlayer1 = Date.now(); 
-            game.lastPingPlayer2 = Date.now();
-
-            try {
-                const insertQuery = `
-                    INSERT INTO live_matches (game_name, player1_id, player2_id, status) 
-                    VALUES ('Tic Tac Toe', $1, $2, 'ongoing') RETURNING id
-                `;
-                const dbRes = await pool.query(insertQuery, [game.player1_id, game.player2_id]);
-                game.dbId = dbRes.rows[0].id;
-            } catch (err) { console.error("Erreur DB restart:", err); }
-        }
-        res.json({ success: true });
+    app.post('/api/game/:id/restart', async (req, res) => {
+        await restartGame(req, res, activeGames, pool, 'Tic Tac Toe');
     });
 
     // Periodic cleanup of old games :

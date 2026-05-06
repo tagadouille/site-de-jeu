@@ -26,6 +26,15 @@ export function formatPlayerLabel(role, playerName, currentUser, waitingText = "
     return `${role} : ${playerName} ${isCurrentUser(playerName, currentUser) ? '(You)' : ''}`;
 }
 
+/**
+ * The function returns the symbol to display in a cell based on the mark value.
+ * This default implementation assumes the backend 
+ * returns "player1", "player2", or "" for empty cells,
+ * and maps them to "X", "O", or "" respectively. This can be overridden by providing a custom getCellMark function
+ * when initializing the game page.
+ * @param {*} mark the mark in the cell ("player1", "player2" or "")
+ * @returns the symbol to display in the cell ("X", "O" or "")
+ */
 function defaultGetCellMark(mark) {
     return mark ?? "";
 }

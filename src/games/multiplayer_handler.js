@@ -1,6 +1,85 @@
 export const activeGames = {};
 
 /**
+ * Function to create a new game board initialized with empty values.
+ * @param {*} boardSize the size of the board (e.g., 9 for tic-tac-toe, 42 for power4)
+ * @returns an array representing the game board, initialized with empty strings
+ */
+function createBoard(boardSize) {
+    return Array(boardSize).fill("");
+}
+
+/**
+ * The function to insert a new match in the database. 
+ * It can handle both single-player and two-player matches by 
+ * checking if player2_id is provided.
+ * @param {*} pool the PostgreSQL pool to perform the database query
+ * @param {*} game_name the name of the game to store in the database (e.g., "Tic Tac Toe")
+ * @param {*} player1_id the ID of the first player (the one who creates the match)
+ * @param {*} player2_id the ID of the second player (optional, can be 
+ * null if waiting for an opponent)
+ * @returns the result of the database query, which includes 
+ * the ID of the newly created match for further reference in memory and future updates
+ */
+async function insertLiveMatch(pool, game_name, player1_id, player2_id = null) {
+
+    if (player2_id == null) {
+        const insertQuery = `
+            INSERT INTO live_matches (game_name, player1_id, status)
+            VALUES ($1, $2, 'ongoing') RETURNING id
+        `;
+        return pool.query(insertQuery, [game_name, player1_id]);
+    }
+
+    const insertQuery = `
+        INSERT INTO live_matches (game_name, player1_id, player2_id, status)
+        VALUES ($1, $2, $3, 'ongoing') RETURNING id
+    `;
+    return pool.query(insertQuery, [game_name, player1_id, player2_id]);
+}
+
+/**
+ * Create a fresh database match entry for the given game.
+ *
+ * @param {object} pool - Pool PostgreSQL.
+ * @param {string} game_name - Name of the game stored in DB.
+ * @param {number} player1_id - First player id.
+ * @param {?number} player2_id - Second player id when restarting a two-player match.
+ * @returns {Promise<object>} PostgreSQL query result.
+ */
+export async function createLiveMatch(pool, game_name, player1_id, player2_id = null) {
+    return insertLiveMatch(pool, game_name, player1_id, player2_id);
+}
+
+/**
+ * Create a new game state object with the provided parameters.
+ * @param {object} params - Parameters for creating the game state.
+ * @param {string} params.game_name - Name of the game (e.g., "Tic Tac Toe").
+ * @param {number} params.boardSize - Size of the game board (e.g., 9 for tic-tac-toe).
+ * @param {string} params.username - Username of the player creating the game.
+ * @param {number} params.userId - User ID of the player creating the game.
+ * @param {object} [params.extraFields={}] - Additional fields to include in the game state.
+ * @returns {object} The initialized game state object.
+ */
+function createGameState({ game_name, boardSize, username, userId, extraFields = {} }) {
+    return {
+        game_name,
+        board: createBoard(boardSize),
+        turn: "player1",
+        winner: null,
+        forfeit: false,
+        player1: username,
+        player1_id: userId,
+        player2: null,
+        player2_id: null,
+        lastPingPlayer1: Date.now(),
+        lastPingPlayer2: null,
+        dbId: null,
+        ...extraFields,
+    };
+}
+
+/**
  * Update the statistics of a player for a game.
  * Generic API usable by multiple games.
  *
@@ -55,15 +134,31 @@ export async function handleDisconnect(pool, game, winnerKey, game_name) {
 
         // Met à jour les stats des deux joueurs (gagnant ou non) uniquement si leur ID est présent.
         if (game.player1_id != null) {
-            await updatePlayerStats(pool, resolvedGameName, game.player1_id, winnerKey === 'player1');
+            await updatePlayerStats(
+                pool,
+                resolvedGameName,
+                game.player1_id,
+                winnerKey === 'player1'
+            );
         } else {
-            console.warn('handleDisconnect: player1_id missing, skip stats update', { dbId: game.dbId });
+            console.warn(
+                'handleDisconnect: player1_id missing, skip stats update',
+                { dbId: game.dbId }
+            );
         }
 
         if (game.player2_id != null) {
-            await updatePlayerStats(pool, resolvedGameName, game.player2_id, winnerKey === 'player2');
+            await updatePlayerStats(
+                pool,
+                resolvedGameName,
+                game.player2_id,
+                winnerKey === 'player2'
+            );
         } else {
-            console.warn('handleDisconnect: player2_id missing, skip stats update', { dbId: game.dbId });
+            console.warn(
+                'handleDisconnect: player2_id missing, skip stats update',
+                { dbId: game.dbId }
+            );
         }
     } catch (err) {
         console.error("Erreur BDD Forfait:", err);
@@ -89,12 +184,19 @@ export function refresh_game_state(app, game_name, activeGames, pool) {
 
         // Save the last ping :
         if (req.session && req.session.user) {
+
             const username = req.session.user.username;
-            if (username === game.player1) game.lastPingPlayer1 = Date.now();
-            if (username === game.player2) game.lastPingPlayer2 = Date.now();
+
+            if (username === game.player1) {
+                game.lastPingPlayer1 = Date.now();
+            }
+            if (username === game.player2) {
+                game.lastPingPlayer2 = Date.now();
+            }
         }
 
         if (game.player2 !== null && game.winner === null) {
+
             const now = Date.now();
             const TIMEOUT = 6000;
 
@@ -138,13 +240,13 @@ export function manage_move(app, game_name, activeGames, pool, checkWin) {
         // If the game does not exist or belongs to a different game type,
         // delegate to the next handler so specific game modules (e.g., Power 4)
         // can implement custom move logic.
-        // Extra guard: ensure the in-memory board shape matches the expected game (Tic Tac Toe uses 9 cells).
         if (!game || game.game_name !== game_name || !Array.isArray(game.board) || game.board.length !== 9) {
             return next();
         }
 
         const index = Number(req.body.index);
-        // Validate index for tic-tac-toe board bounds
+
+        // Validate index for board bounds :
         if (!Number.isInteger(index) || index < 0 || index >= game.board.length) {
             return res.status(400).json({ success: false });
         }
@@ -208,7 +310,9 @@ export function manage_move(app, game_name, activeGames, pool, checkWin) {
  * @param {string} game_name - Name of the game for the database (e.g., "Tic Tac Toe").
  * @param {string} routeBase - Final route : `/games/${routeBase}/${gameIdToJoin}`.
  */
-export async function match_making(req, res, activeGames, pool, game_name, routeBase) {
+export async function match_making(req, res, activeGames, pool, game_name, routeBase, options = {}) {
+
+    const boardSize = options.boardSize ?? 9;
 
     if (!req.session || !req.session.user) {
         return res.redirect('/signin');
@@ -246,28 +350,10 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
     // No game open : initialize a new memory and DB entry :
     if (!gameIdToJoin) {
-
-        const new_game = {
-            game_name,
-            board: ["", "", "", "", "", "", "", "", ""], // TODO : make it generic for other games
-            turn: "player1",
-            winner: null,
-            forfeit: false,
-            player1: username,
-            player1_id: userId,
-            player2: null,
-            player2_id: null,
-            lastPingPlayer1: Date.now(),
-            lastPingPlayer2: null,
-            dbId: null,
-        };
+        const new_game = createGameState({ game_name, boardSize, username, userId });
 
         try {
-            const insertQuery = `
-                INSERT INTO live_matches (game_name, player1_id, status) 
-                VALUES ($1, $2, 'ongoing') RETURNING id
-            `;
-            const dbRes = await pool.query(insertQuery, [game_name, userId]);
+            const dbRes = await createLiveMatch(pool, game_name, userId);
 
             // The DB id will also serve as a memory key :
             new_game.dbId = dbRes.rows[0].id;
@@ -281,6 +367,43 @@ export async function match_making(req, res, activeGames, pool, game_name, route
     }
 
     res.redirect(`/games/${routeBase}/${gameIdToJoin}`);
+}
+
+/**
+ * Reset a game board and persist a new ongoing match in the database.
+ *
+ * @param {object} req - Express request.
+ * @param {object} res - Express response.
+ * @param {object} activeGames - In-memory game registry.
+ * @param {object} pool - PostgreSQL pool.
+ * @param {string} game_name - Name of the game stored in DB.
+ * @param {object} options - Game-specific options.
+ * @param {number} options.boardSize - Board size to recreate.
+ */
+export async function restartGame(req, res, activeGames, pool, game_name, options = {}) {
+
+    const boardSize = options.boardSize ?? 9; // Default to 9 for tic-tac-toe if not specified
+    const game = activeGames[req.params.id];
+
+    if (!game || game.forfeit || game.player2 === null) {
+        return res.status(400).json({ success: false, message: "Impossible de relancer." });
+    }
+
+    game.board = createBoard(boardSize);
+    game.turn = "player1";
+    game.winner = null;
+    game.forfeit = false;
+    game.lastPingPlayer1 = Date.now();
+    game.lastPingPlayer2 = Date.now();
+
+    try {
+        const dbRes = await createLiveMatch(pool, game_name, game.player1_id, game.player2_id);
+        game.dbId = dbRes.rows[0].id;
+    } catch (err) {
+        console.error("Erreur DB restart:", err);
+    }
+
+    res.json({ success: true });
 }
 
 
@@ -312,7 +435,8 @@ export function cleanup(activeGames, pool) {
                 if (game.dbId) {
                     try {
                         await pool.query(
-                            `UPDATE live_matches SET status = 'finished', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'ongoing'`,
+                            `UPDATE live_matches SET status = 'finished', ` + 
+                            `ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'ongoing'`,
                             [game.dbId]
                         );
                     } catch (err) {
@@ -340,7 +464,6 @@ export function cleanup(activeGames, pool) {
                 }
             } catch (err) {
                 console.error('Erreur lors du traitement du forfait:', err);
-                // Ensure the stale game is removed to avoid infinite loops
                 delete activeGames[id];
             }
         }
