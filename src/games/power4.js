@@ -257,7 +257,13 @@ export function runPower4(server) {
     });
 
     // Reinitialize the grid without deleting the game if the two players are always present :
-    app.post('/api/game/:id/restart', async (req, res) => {
+    app.post('/api/game/:id/restart', async (req, res, next) => {
+        const game = activeGames[req.params.id];
+
+        if (!game || game.game_name !== 'Power 4') {
+            return next();
+        }
+
         await restartGame(req, res, activeGames, pool, 'Power 4', { boardSize: GRID_SIZE });
     });
 

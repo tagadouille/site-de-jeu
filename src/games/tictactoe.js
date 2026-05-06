@@ -80,7 +80,13 @@ export function runTicTacToe(server) {
     manage_move(app, 'Tic Tac Toe', activeGames, pool, checkWin);
 
     // Reinitialize the grid without deleting the game if the two players are always presents :
-    app.post('/api/game/:id/restart', async (req, res) => {
+    app.post('/api/game/:id/restart', async (req, res, next) => {
+        const game = activeGames[req.params.id];
+
+        if (!game || game.game_name !== 'Tic Tac Toe') {
+            return next();
+        }
+
         await restartGame(req, res, activeGames, pool, 'Tic Tac Toe');
     });
 
