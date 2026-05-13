@@ -106,9 +106,11 @@ export function runUsers(server) {
         }
 
         let is_connected = false;
+        let session_username = null;
 
-        if(req.session.user) {
+        if(req.session && req.session.user) {
             is_connected = true;
+            session_username = req.session.user.username;
         }
 
         //On envoie les données filtrées à la vue
@@ -116,6 +118,7 @@ export function runUsers(server) {
             users: filteredUsers,
             games: allGames,
             is_connect: is_connected,
+            session_username: session_username,
             filters: { search: searchQuery, game: gameQuery, status: statusQuery }
         });
 

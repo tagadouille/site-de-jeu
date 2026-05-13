@@ -61,7 +61,7 @@ export async function createLiveMatch(pool, game_name, player1_id, player2_id = 
  * @param {object} [params.extraFields={}] - Additional fields to include in the game state.
  * @returns {object} The initialized game state object.
  */
-function createGameState({ game_name, boardSize, username, userId, extraFields = {} }) {
+export function createGameState({ game_name, boardSize, username, userId, extraFields = {} }) {
     return {
         game_name,
         board: createBoard(boardSize),
@@ -75,6 +75,9 @@ function createGameState({ game_name, boardSize, username, userId, extraFields =
         lastPingPlayer1: Date.now(),
         lastPingPlayer2: null,
         dbId: null,
+        createdAt: Date.now(),
+        invite_rejected: false,
+        invite_expired: false,
         ...extraFields,
     };
 }
@@ -214,7 +217,8 @@ export function refresh_game_state(app, game_name, activeGames, pool) {
 
         res.json({
             board: game.board, turn: game.turn, winner: game.winner,
-            player1: game.player1, player2: game.player2, forfeit: game.forfeit
+            player1: game.player1, player2: game.player2, forfeit: game.forfeit,
+            invite_rejected: game.invite_rejected, invite_expired: game.invite_expired
         });
     });
 }
@@ -324,6 +328,13 @@ export async function match_making(req, res, activeGames, pool, game_name, route
 
     for (const [id, game] of Object.entries(activeGames)) {
 
+        if (game.invite_rejected || game.invite_expired) {
+            continue;
+        }
+        if (game.game_name !== game_name) {
+            continue;
+        }
+
         // If a game is waiting for a second player and it's not the same user, join it :
         if (game.player2 === null && game.player1 !== username) {
             gameIdToJoin = id;
@@ -425,6 +436,26 @@ export function cleanup(activeGames, pool) {
         for (const [id, game] of Object.entries(activeGames)) {
 
             const isPlayer1Gone = game.lastPingPlayer1 && (now - game.lastPingPlayer1 > TIMEOUT);
+            if (game.player2 === null) {
+                
+                const INVITE_TIMEOUT = 45000; 
+                if (!game.invite_rejected && !game.invite_expired && (now - game.createdAt > INVITE_TIMEOUT)) {
+                    game.invite_expired = true;
+                    pool.query(`UPDATE invitations SET status = 'expired' WHERE game_id = $1`, [id]).catch(()=>{});
+                }
+                if (isPlayer1Gone) {
+                    if (game.dbId) {
+                        try {
+                            await pool.query(
+                                `UPDATE live_matches SET status = 'finished', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'ongoing'`,
+                                [game.dbId]
+                            );
+                        } catch (err) {}
+                    }
+                    delete activeGames[id];
+                }
+                continue; 
+            }
             const isPlayer2Gone = game.lastPingPlayer2 && (now - game.lastPingPlayer2 > TIMEOUT);
 
             const player1Present = !!game.player1 && !isPlayer1Gone;

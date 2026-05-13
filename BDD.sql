@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS played_games CASCADE;
 DROP TABLE IF EXISTS fav_games CASCADE;
 DROP TABLE IF EXISTS games CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS invitations CASCADE;
 
 /*-----------TABLES---------------*/
 
@@ -70,6 +71,17 @@ CREATE TABLE live_chats(
   FOREIGN KEY (sender) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (receiver) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (match_id) REFERENCES live_matches(id) ON DELETE CASCADE
+);
+
+CREATE TABLE invitations (
+    id SERIAL PRIMARY KEY,
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    game_name VARCHAR(255) NOT NULL,
+    game_id VARCHAR(255),
+    status VARCHAR(20) DEFAULT 'pending', 
+    proposed_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 /*-----------INSERTIONS---------------*/

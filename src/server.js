@@ -18,6 +18,7 @@ import { runChat } from "./games/chat_backend.js";
 import { runStats } from "./profile/stats.js";
 import { runSeach } from "./search_backend.js";
 import { runPower4 } from "./games/power4.js";
+import { runNotifications } from "./users/notifications.js";
 
 /*------------------------SERVER CONFIG-----------------------*/
 
@@ -79,6 +80,7 @@ runPower4(app_obj);
 runChat(app_obj);
 runStats(app_obj);
 runSeach(app_obj);
+runNotifications(app_obj);
 
 // Handle 404
 app.use(function(req, res, next) {
@@ -86,6 +88,16 @@ app.use(function(req, res, next) {
 });
 
 runError(app_obj);
+Promise.all([
+    pool.query("UPDATE live_matches SET status = 'finished' WHERE status = 'ongoing'"),
+    pool.query("UPDATE users SET is_connected = false")
+])
+.then(() => {
+    console.log("BDD clean :");
+    console.log("   - Ghost matches closed.");
+    console.log("   - All users marked as offline.");
+})
+.catch(err => console.error("❌ Error :", err));
 
 /*------------------------LISTEN-----------------------*/
 const httpServer = app.listen(PORT, () => {
@@ -97,3 +109,4 @@ httpServer.on("error", (err) => {
     console.error("Server startup error:", err);
     process.exitCode = 1;
 });
+
