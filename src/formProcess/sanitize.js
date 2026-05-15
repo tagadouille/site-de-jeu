@@ -3,6 +3,8 @@
  * underscores and hyphens, and if it is between 3 and 20 characters long
  * @param {*} text the text to verify
  * @returns a 400 error if the text contains invalid characters, otherwise it returns nothing
+ * 
+ * @author Elias Dai
  */
 export function verifyField(text) {
 
@@ -14,6 +16,8 @@ export function verifyField(text) {
  *  any potentially dangerous characters
  * @param {*} value the text to sanitize
  * @returns the sanitized text
+ * 
+ * @author Elias Dai
  */
 export function sanitizeText(value) {
     return String(value ?? "")

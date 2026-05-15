@@ -1,0 +1,24 @@
+.chatpane {
+
+    background-color: #260048;
+}
+
+.message-container {
+
+    height: 250px;
+}
+
+.user1 {
+
+    background-color: blueviolet;
+}
+
+.user2 {
+
+    background-color: cadetblue;
+}
+
+#message-bar {
+
+    background-color: #d0d0d0;
+}

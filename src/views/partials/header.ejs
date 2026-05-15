@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="/jquery-4.0.0.min.js"></script>
+    <script defer src="search.js"></script>
     <script defer type="module" src="<%= script %>"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <link rel = "stylesheet" href = "/css-styles/header.css">
     <link rel = "stylesheet" href = "/css-styles/footer.css">
+    <link rel="stylesheet" href = "/css-styles/search.css">
     <%- stylesheet_html %>
 
     <!-- Bootstrap CSS -->
@@ -94,10 +96,80 @@
                 } 
                 
                 function search_bar() { %>
-                     <input type="text" class="form-control" placeholder="Search..." name="search">
+
+                    <!--SEARCH BAR + POPUP-->
+                    <div class="search-container position-relative d-inline-block w-100">
+
+                        <input type="text" class="form-control search-input" placeholder="Search..." name="searchBar">
+
+                        <div class="search-popup card p-2 shadow overflow-scroll" style="display:none; position:absolute; max-height: 100px;">
+                        </div>
+                    </div>
                     <%
                 }
             %>
 
         </nav>
     </header>
+    <meta id="user-connection-status" data-connected="<%= (typeof is_connect !== 'undefined' && is_connect) ? 'true' : 'false' %>">
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  <div id="inviteToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header bg-primary text-white">
+      <strong class="me-auto">🎮 New Invitation !</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      <span id="toastMsg"></span>
+      <div class="mt-2 pt-2 border-top">
+        <a href="/notifications" class="btn btn-primary btn-sm">View Invitation</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+    const statusMeta = document.getElementById('user-connection-status');
+    const isConnected = statusMeta ? statusMeta.getAttribute('data-connected') === 'true' : false;
+
+    if (isConnected) {
+        let lastInviteId = 0;
+
+        async function checkInvites() {
+            try {
+                const res = await fetch('/api/notifications/check');
+                const data = await res.json();
+
+                if (data.newInvite && data.invite.id !== lastInviteId) {
+                    lastInviteId = data.invite.id;
+                    
+                    document.getElementById('toastMsg').textContent = `${data.invite.sender_name} invited you to play ${data.invite.game_name} !`;
+                    const toastEl = document.getElementById('inviteToast');
+                    if (window.bootstrap) {
+                        const toast = new bootstrap.Toast(toastEl);
+                        toast.show();
+                    }
+                }
+                if (data.acceptedSentInvite) {
+                    const routeBase = data.accepted.game_name === 'Power 4' ? 'power4' : 'tictactoe';
+                    document.getElementById('toastMsg').innerHTML = `
+                        <strong>${data.accepted.receiver_name}</strong> has accepted your invitation!<br>
+                        <a href="/games/${routeBase}/${data.accepted.game_id}" class="btn btn-success btn-sm mt-2">Go to Game Screen</a>
+                    `;
+                    const toast = new bootstrap.Toast(document.getElementById('inviteToast'), {autohide: false});
+                    toast.show();
+                }
+
+                if (data.rejectedSentInvite) {
+                    const reason = data.rejected.status === 'expired' ? "did not respond to" : "rejected";
+                    document.getElementById('toastMsg').innerHTML = `<strong>${data.rejected.receiver_name}</strong> ${reason} your invitation.`;
+                    const toast = new bootstrap.Toast(document.getElementById('inviteToast'));
+                    toast.show();
+                }
+            } catch (err) {}
+        }
+        setInterval(checkInvites, 5000);
+    }
+})();
+</script>

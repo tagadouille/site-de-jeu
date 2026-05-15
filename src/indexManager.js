@@ -3,6 +3,8 @@ import { get_image } from "./games/game_utils.js";
 /**
  * Back-end manager for the index page
  * @param {*} app the express app object
+ * 
+ * @author Elias Dai
  */
 export function runIndex(app) {
 
@@ -50,6 +52,8 @@ export function runIndex(app) {
  * @param {*} pool  the pool to connect to the database
  * @returns  the list of all the games in the database
  * @throws an error if the database query fails
+ * 
+ * @author Elias Dai
  */
 async function get_all_games(pool) {
 

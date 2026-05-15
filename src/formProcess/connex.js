@@ -68,6 +68,8 @@ export function runConnex(server) {
  * @param {*} pool the pool to connect to the database
  * @param {*} username the username of the account to retrieve
  * @returns the account information for the given username
+ * 
+ * @author Elias Dai
  */
 async function get_account(pool, username) {
 
@@ -95,6 +97,8 @@ async function get_account(pool, username) {
  * Set the user as online
  * @param {*} pool the pool to connect to the database
  * @param {*} username the username of the account to retrieve
+ * 
+ * @author Elias Dai
  */
 async function set_online(pool, username) {
 

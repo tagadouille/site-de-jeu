@@ -104,6 +104,25 @@
                             <% } %>
                         </div>
 
+                <div class="mt-2">
+                    <% if (typeof session_username !== 'undefined' && user.username !== session_username) { %>
+                        <form action="/api/invite" method="POST" class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="receiver_username" value="<%= user.username %>">
+                            
+                            <select name="game_name" class="form-select form-select-sm w-auto">
+                                <option value="Tic Tac Toe">Tic Tac Toe</option>
+                                <option value="Power 4">Power 4</option>
+                            </select>
+                            
+                            <% if (user.status === 'offline') { %>
+                                <input type="datetime-local" name="proposed_date" class="form-control form-control-sm w-auto" required>
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Propose (Email)</button>
+                            <% } else { %>
+                                <button type="submit" class="btn btn-sm btn-primary">Invite</button>
+                            <% } %>
+                        </form>
+                    <% } %>
+                </div>
                     </div>
                 </div>
             <% }); %>

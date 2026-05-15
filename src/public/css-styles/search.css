@@ -1,0 +1,43 @@
+.search-container {
+    width: 100%;
+}
+
+.search-popup {
+    
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    min-width: 100%;
+    width: 100%;
+}
+
+.search-popup a {
+
+    color: white;
+    text-decoration: none;
+}
+
+.search-image {
+
+    width: 75px;
+    height: auto;
+}
+
+.search-game {
+    background-color: #000027;
+}
+
+.search-game :hover{
+    background-color: #000023;
+}
+
+@media (max-width: 767.98px) {
+    .search-container {
+        width: 100%;
+    }
+
+    .search-popup {
+        max-height: 220px !important;
+    }
+}

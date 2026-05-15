@@ -1,9 +1,11 @@
 /*-----------DROP TABLES---------------*/
 DROP TABLE IF EXISTS live_matches CASCADE;
+DROP TABLE IF EXISTS live_chats CASCADE;
 DROP TABLE IF EXISTS played_games CASCADE;
 DROP TABLE IF EXISTS fav_games CASCADE;
 DROP TABLE IF EXISTS games CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS invitations CASCADE;
 
 /*-----------TABLES---------------*/
 
@@ -46,16 +48,40 @@ CREATE TABLE played_games (
 CREATE TABLE live_matches (
     id SERIAL PRIMARY KEY,
     game_name VARCHAR(255) NOT NULL,
-    player_x_id INTEGER NOT NULL,
-    player_o_id INTEGER,
+    player1_id INTEGER NOT NULL,
+    player2_id INTEGER,
     status VARCHAR(20) DEFAULT 'ongoing',
     winner_id INTEGER, 
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP,
     FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE,
-    FOREIGN KEY (player_x_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (player_o_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (player1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (player2_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE live_chats(
+  id SERIAL PRIMARY KEY,
+  sender INTEGER NOT NULL,
+  receiver INTEGER NOT NULL,
+  message TEXT NOT NULL,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  match_id INTEGER NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT false,
+  FOREIGN KEY (sender) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (receiver) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (match_id) REFERENCES live_matches(id) ON DELETE CASCADE
+);
+
+CREATE TABLE invitations (
+    id SERIAL PRIMARY KEY,
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    game_name VARCHAR(255) NOT NULL,
+    game_id VARCHAR(255),
+    status VARCHAR(20) DEFAULT 'pending', 
+    proposed_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 /*-----------INSERTIONS---------------*/

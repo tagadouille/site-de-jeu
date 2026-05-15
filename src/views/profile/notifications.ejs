@@ -1,0 +1,96 @@
+<%- include('../partials/header.ejs', { title: "My notifications", script: "", stylesheet_html: "" }) %>
+
+<div class="container my-5">
+    <h2 class="mb-4">Invitations Reçues</h2>
+
+    <div id="notifications-list" class="list-group shadow-sm">
+        <% if (invitationsReceived.length === 0) { %>
+            <div class="alert alert-info">You have no pending invitations.</div>
+        <% } else { %>
+            <% invitationsReceived.forEach(invite => { %>
+                <div class="list-group-item d-flex justify-content-between align-items-center p-3" id="invite-<%= invite.id %>">
+                    <div>
+                        <strong><%= invite.sender_name %></strong> invited you to play 
+                        <span class="badge bg-primary"><%= invite.game_name %></span>
+                        <% if (invite.proposed_date) { %>
+                            <br><small class="text-muted">Asked for : <%= new Date(invite.proposed_date).toLocaleString() %></small>
+                        <% } %>
+                    </div>
+                    <div>
+                        <button class="btn btn-success btn-sm me-2 btn-respond" data-id="<%= invite.id %>" data-action="accept">Accept</button>
+                        <button class="btn btn-danger btn-sm btn-respond" data-id="<%= invite.id %>" data-action="reject">Reject</button>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+</div>
+
+<h3 class="mt-5 mb-4">Invitations Sent</h3>
+
+    <div class="list-group shadow-sm mb-5">
+        <% if (invitationsSent.length === 0) { %>
+            <div class="alert alert-light text-muted border mb-0">You have no pending invitations sent.</div>
+        <% } else { %>
+            <% invitationsSent.forEach(invite => { %>
+                <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        You have invited <strong><%= invite.receiver_name %></strong> to play 
+                        <span class="badge bg-secondary"><%= invite.game_name %></span>
+                        <% if (invite.proposed_date) { %>
+                            <br><small class="text-muted">Proposed for : <%= new Date(invite.proposed_date).toLocaleString() %></small>
+                        <% } %>
+                    </div>
+                    <div>
+                        <% if (invite.game_id) { %>
+                            <% const routeBase = invite.game_name === 'Power 4' ? 'power4' : 'tictactoe'; %>
+                            <a href="/games/<%= routeBase %>/<%= invite.game_id %>" class="btn btn-outline-primary btn-sm">Join game</a>
+                        <% } else { %>
+                            <span class="text-muted small">Pending (Email)</span>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+
+<script>
+document.querySelectorAll('.btn-respond').forEach(button => {
+    button.addEventListener('click', async function() {
+        const id = this.getAttribute('data-id');
+        const action = this.getAttribute('data-action');
+        
+        try {
+            const response = await fetch(`/api/invite/${id}/respond`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                const parentDiv = this.parentElement;
+
+                if (action === 'accept') {
+                    if (data.type === 'live') {
+                        parentDiv.innerHTML = `
+                            <span class="text-success me-2">✔ Accepted</span>
+                            <a href="${data.redirect}" class="btn btn-success btn-sm">Go to Game Screen</a>
+                        `;
+                    } else {
+                        parentDiv.innerHTML = `
+                            <span class="text-success">✔ Invitation accepted !</span>
+                        `;
+                    }
+                } else {
+                    document.getElementById(`invite-${id}`).remove();
+                }
+            }
+        } catch (err) {
+            console.error("Error invitation response:", err);
+        }
+    });
+});
+</script>
+
+<%- include('../partials/footer.ejs') %>

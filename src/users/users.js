@@ -23,9 +23,9 @@ export function runUsers(server) {
             const favGamesRes = await client.query("SELECT user_id, game_name FROM fav_games");
 
             const liveMatchesRes = await client.query(`
-                SELECT game_name, player_x_id, player_o_id 
+                SELECT game_name, player1_id, player2_id 
                 FROM live_matches 
-                WHERE status = 'ongoing' AND player_o_id IS NOT NULL
+                WHERE status = 'ongoing' AND player2_id IS NOT NULL
             `);
 
          
@@ -58,12 +58,12 @@ export function runUsers(server) {
                 let playingGame = null;
                 let playingWith = null;
                 const activeMatch = liveMatchesRes.rows.find(match => 
-                    match.player_x_id === dbUser.id || match.player_o_id === dbUser.id
+                    match.player1_id === dbUser.id || match.player2_id === dbUser.id
                 );
 
                 if (activeMatch) {
                     playingGame = activeMatch.game_name;
-                    const opponentId = activeMatch.player_x_id === dbUser.id ? activeMatch.player_o_id : activeMatch.player_x_id;
+                    const opponentId = activeMatch.player1_id === dbUser.id ? activeMatch.player2_id : activeMatch.player1_id;
                     playingWith = usernameMap[opponentId];
                     currentStatus = "busy"; 
                 }
@@ -106,9 +106,11 @@ export function runUsers(server) {
         }
 
         let is_connected = false;
+        let session_username = null;
 
-        if(req.session.user) {
+        if(req.session && req.session.user) {
             is_connected = true;
+            session_username = req.session.user.username;
         }
 
         //On envoie les données filtrées à la vue
@@ -116,6 +118,7 @@ export function runUsers(server) {
             users: filteredUsers,
             games: allGames,
             is_connect: is_connected,
+            session_username: session_username,
             filters: { search: searchQuery, game: gameQuery, status: statusQuery }
         });
 

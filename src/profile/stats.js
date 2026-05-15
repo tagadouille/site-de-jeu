@@ -1,8 +1,10 @@
 import { get_image } from "../games/game_utils.js";
 
 /**
+ * The function to run the stats backend, sets up the route and handles the request
+ * @param {*} server the server object containing the app and database pool
  * 
- * @param {*} server 
+ * @author Elias Dai
  */
 export function runStats(server) {
     let app = server.app;
@@ -15,18 +17,11 @@ export function runStats(server) {
 
         let client;
 
-        const username = req.session.user.username;
+        const user_id = req.session.user.id;
 
         try {
 
             client = await server.pool.connect();
-
-            // Obtain the user id from the database :
-            const user_id = await get_user_id(client, username);
-
-            if(user_id === 0) {
-                return res.redirect('/signin');
-            }
 
             // Obtain the global stats for the user :
             let rows = await get_stats(client, user_id);
@@ -65,7 +60,9 @@ export function runStats(server) {
  * The function to get user global stats from the database
  * @param {*} client the client to connect to the database
  * @param {*} user_id the id of the user to get the stats for
- * @returns 
+ * @returns the global stats for the user
+ * 
+ * @author Elias Dai
  */
 async function get_stats(client, user_id) {
 
@@ -79,19 +76,13 @@ async function get_stats(client, user_id) {
 
 /**
  * The function to get the user id from the database
- * @param {*} client the client to connect to the database
- * @param {*} username the username to get the id for
- * @returns the user id or 0 if not found
+ * @param {*} client  the client to connect to the database
+ * @param {*} user_id the username of the user to get the id for
+ * @returns the id of the user
+ * @returns 0 if the user is not found
+ * 
+ * @author Elias Dai
  */
-async function get_user_id(client, username) {
-
-    const res = await client.query(
-        "SELECT id FROM users WHERE username = $1"
-        , [username]
-    );
-    return res.rows[0].id ?? 0;
-}
-
 async function get_games_stats(client, user_id) {
     const res = await client.query(
         "SELECT game_name, number_of_wins, number_of_matches FROM played_games" +
@@ -106,6 +97,8 @@ async function get_games_stats(client, user_id) {
  * @param {*} number_of_wins 
  * @param {*} number_of_matches 
  * @returns the winrates
+ * 
+ * @author Elias Dai
  */
 function get_win_rates(number_of_wins, number_of_matches) {
     return Number(((number_of_wins / number_of_matches) * 100).toFixed(2));
