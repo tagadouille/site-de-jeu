@@ -8,7 +8,7 @@ export function runChat(server) {
     let pool = server.pool;
 
     // Handle message sending :
-    app.post('/api/message', async (req, res) => {
+    app.post('/api/message', async (req, res, next) => {
 
         if (req.session === undefined || req.session.user === undefined) {
             res.redirect("/signin");
@@ -30,9 +30,8 @@ export function runChat(server) {
                 res.json({ success: true, message: 'Message sent successfully' });
             }
             catch (err) {
-                hasDatabaseError = true;
-                console.error(err);
-                res.status(500).json({ success: false, error: err.message });
+                console.error('Error in POST /api/message:', err);
+                return next(err);
             }
 
         } else {
@@ -41,7 +40,7 @@ export function runChat(server) {
     });
 
     // Handle message update :
-    app.get('/api/message/:matchId/status', async (req, res) => {
+    app.get('/api/message/:matchId/status', async (req, res, next) => {
 
         if (req.session === undefined || req.session.user === undefined) {
             res.redirect("/signin");
@@ -59,15 +58,11 @@ export function runChat(server) {
 
         try {
             messages = await get_message(pool, matchId, currentUserId);
+            res.json({ messages: messages });
         }
         catch (err) {
-            console.error(err);
-        }
-        finally {
-            
-            res.json({
-                messages: messages
-            });
+            console.error('Error in GET /api/message/:matchId/status:', err);
+            return next(err);
         }
     });
 }

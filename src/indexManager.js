@@ -8,41 +8,28 @@ import { get_image } from "./games/game_utils.js";
  */
 export function runIndex(app) {
 
-    app.app.get("/", async (req, res) => {
-
-        let games = [];
-        let hasDatabaseError = false;
+    app.app.get("/", async (req, res, next) => {
 
         try {
             const dbGames = await get_all_games(app.pool);
-            games = (Array.isArray(dbGames) ? dbGames : []).map((game) => ({
+            const games = (Array.isArray(dbGames) ? dbGames : []).map((game) => ({
                 ...game,
                 image: get_image(game.name),
             }));
-        }
-        catch (err) {
-            hasDatabaseError = true;
-            console.error(err);
-            games = [{
-                name: "Error",
-                image: "/favicon.ico",
-                description: "Error while loading the games"
-            }];
-        }
-        finally {
-            const response = hasDatabaseError ? res.status(500) : res;
 
             let is_connect = false;
-
-            if(req.session.user) {
+            if (req.session && req.session.user) {
                 is_connect = true;
             }
 
-            response.render("index.ejs", {
+            res.render("index.ejs", {
                 games: games,
                 is_connect: is_connect,
                 is_display_buttons: true //TODO SESSION
             });
+        } catch (err) {
+            console.error('Error in GET /:', err);
+            return next(err);
         }
     });
 }

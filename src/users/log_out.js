@@ -12,14 +12,14 @@ export function runLogOut(server) {
     let app = server.app;
     let baseUrl = server.action;
 
-    app.get('/logout', (req, res) => {
+    app.get('/logout', (req, res, next) => {
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
         }
         res.render("users/log_out.ejs", { action: baseUrl });
     });
 
-    app.post('/logout', async (req, res) => {
+    app.post('/logout', async (req, res, next) => {
 
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
@@ -29,13 +29,15 @@ export function runLogOut(server) {
 
         req.session.destroy(async (err) => {
             if (err) {
-                return res.status(500).send("Erreur logout");
+                console.error('Error destroying session during logout:', err);
+                return next(err);
             }
 
             try {
                 await set_offline(server.pool, username);
             } catch (e) {
-                console.error(e);
+                console.error('Error setting user offline during logout:', e);
+                return next(e);
             }
 
             res.clearCookie('connect.sid');

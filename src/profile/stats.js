@@ -9,7 +9,7 @@ import { get_image } from "../games/game_utils.js";
 export function runStats(server) {
     let app = server.app;
 
-    app.get('/profile/stats', async (req, res) => {
+    app.get('/profile/stats', async (req, res, next) => {
 
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
@@ -47,8 +47,8 @@ export function runStats(server) {
             });
         }
         catch (err) {
-            console.log(err);
-            res.status(500);
+            console.error('Error in GET /profile/stats:', err);
+            return next(err);
         }
         finally {
             if (client) client.release();

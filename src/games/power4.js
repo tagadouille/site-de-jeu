@@ -153,12 +153,18 @@ export function runPower4(server) {
     let pool = server.pool;
 
     // Game main menu : join an existant game if possible, else create a new :
-    app.get('/games/power4', async (req, res) => {
-        await match_making(req, res, activeGames, pool, 'Power 4', 'power4', { boardSize: GRID_SIZE });
+    app.get('/games/power4', async (req, res, next) => {
+        try {
+            await match_making(req, res, activeGames, pool, 'Power 4', 'power4', { boardSize: GRID_SIZE });
+        } catch (err) {
+            console.error('Error in GET /games/power4:', err);
+            return next(err);
+        }
     });
 
     // Game page : transmit useful information to the front and the chat :
-    app.get('/games/power4/:id', (req, res) => {
+    app.get('/games/power4/:id', (req, res, next) => {
+        try {
         if (!req.session || !req.session.user) return res.redirect('/signin');
 
         const game = activeGames[req.params.id];
@@ -183,13 +189,19 @@ export function runPower4(server) {
             user_id: req.session.user.id,
             receiver_id: receiver_id,
         });
+        } catch (err) {
+            console.error('Error in GET /games/power4/:id:', err);
+            return next(err);
+        }
     });
 
     // Syncronization point use by the front for refresh the game state :
     refresh_game_state(app, 'Power 4', activeGames, pool);
 
     // Custom Power 4 move handler with gravity and board validation
-    app.post('/api/game/:id/play', async (req, res) => {
+    app.post('/api/game/:id/play', async (req, res, next) => {
+
+        try {
 
         if (!req.session || !req.session.user) {
             return res.status(401).json({ success: false });
@@ -247,6 +259,7 @@ export function runPower4(server) {
 
             } catch (err) {
                 console.error("Erreur BDD fin de partie:", err);
+                return next(err);
             }
         } else {
             // Switch turn
@@ -254,6 +267,10 @@ export function runPower4(server) {
         }
 
         res.json({ success: true });
+        } catch (err) {
+            console.error('Unexpected error in POST /api/game/:id/play:', err);
+            return next(err);
+        }
     });
 
     // Reinitialize the grid without deleting the game if the two players are always present :

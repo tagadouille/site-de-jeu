@@ -11,24 +11,15 @@ export function runSeach(server) {
     let app = server.app;
     let baseUrl = server.action;
 
-    app.get("/api/search", async (req, res) => {
-
-        const query = sanitizeText(req.query.q);
-        let games = [];
-
-        let hasDatabaseError = false;
+    app.get("/api/search", async (req, res, next) => {
 
         try {
-            games = await search(server.pool, query);
-        }
-        catch (err) {
-            hasDatabaseError = true;
-            console.error(err);
-        }
-        finally {
-            const response = hasDatabaseError ? res.status(500) : res;
-
-            res.json({games : games});
+            const query = sanitizeText(req.query.q);
+            const games = await search(server.pool, query);
+            res.json({ games: games });
+        } catch (err) {
+            console.error('Error in GET /api/search:', err);
+            return next(err);
         }
     });
 

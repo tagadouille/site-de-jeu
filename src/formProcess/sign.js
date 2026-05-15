@@ -11,7 +11,7 @@ export function runSign(server) {
     let app = server.app;
     let baseUrl = server.action;
 
-    app.get('/signup', (req, res) => {
+    app.get('/signup', (req, res, next) => {
 
         if(req.session && req.session.user) {
             return res.redirect('/profile');
@@ -19,7 +19,7 @@ export function runSign(server) {
         res.render("Form/formSign.ejs", { action: baseUrl });
     });
 
-    app.post('/signup', async (req, res) => {
+    app.post('/signup', async (req, res, next) => {
 
         if(req.session && req.session.user) {
             return res.redirect('/profile');
@@ -70,8 +70,8 @@ export function runSign(server) {
             res.redirect('/signin');
 
         } catch (err) {
-            console.error("Error during signup:", err);
-            return res.status(500).send("An error occurred while creating the account. Please try again later.");
+            console.error("Unexpected error during signup:", err);
+            return next(err);
         }
     });
 }

@@ -15,7 +15,7 @@ export function runNotifications(server) {
     let app = server.app;
     let pool = server.pool;
 
-    app.post('/api/invite', async (req, res) => {
+    app.post('/api/invite', async (req, res, next) => {
         if (!req.session || !req.session.user) return res.redirect('/signin');
 
         const senderId = req.session.user.id;
@@ -86,12 +86,12 @@ export function runNotifications(server) {
                 }
             }
         } catch (err) {
-            console.error(err);
-            res.status(500).send("Erreur serveur");
+            console.error('Error in POST /api/invite:', err);
+            return next(err);
         }
     });
 
-    app.post('/api/invite/:id/respond', async (req, res) => {
+    app.post('/api/invite/:id/respond', async (req, res, next) => {
         if (!req.session || !req.session.user) return res.status(401).json({ success: false });
         
         const { action } = req.body; 
@@ -141,13 +141,13 @@ export function runNotifications(server) {
             }
             res.json({ success: true });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ success: false });
+            console.error('Error in POST /api/invite/:id/respond:', err);
+            return next(err);
         }
     });
 
     // 1. PAGE DES NOTIFICATIONS
-    app.get('/notifications', async (req, res) => {
+    app.get('/notifications', async (req, res, next) => {
         if (!req.session || !req.session.user) return res.redirect('/signin');
 
         try {
@@ -176,12 +176,12 @@ export function runNotifications(server) {
                 invitationsSent: sentResult.rows
             });
         } catch (err) {
-            console.error(err);
-            res.status(500).send("Erreur serveur");
+            console.error('Error in GET /notifications:', err);
+            return next(err);
         }
     });
 
-    app.get('/api/notifications/check', async (req, res) => {
+    app.get('/api/notifications/check', async (req, res, next) => {
         if (!req.session || !req.session.user) return res.json({ newInvite: false });
         const userId = req.session.user.id;
 
@@ -208,6 +208,9 @@ export function runNotifications(server) {
             }
 
             res.json(responseData);
-        } catch (err) { res.json({ newInvite: false }); }
+        } catch (err) {
+            console.error('Error in GET /api/notifications/check:', err);
+            return next(err);
+        }
     });
 }

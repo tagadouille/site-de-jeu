@@ -41,36 +41,45 @@ export function runTicTacToe(server) {
     let pool = server.pool;
 
     // Game main menu : join an existant game if possible, else create a new :
-    app.get('/games/tictactoe', async (req, res) => {
-        await match_making(req, res, activeGames, pool, 'Tic Tac Toe', 'tictactoe');
+    app.get('/games/tictactoe', async (req, res, next) => {
+        try {
+            await match_making(req, res, activeGames, pool, 'Tic Tac Toe', 'tictactoe');
+        } catch (err) {
+            console.error('Error in GET /games/tictactoe:', err);
+            return next(err);
+        }
     });
 
     // Game page : transmit useful information to the front and the chat :
-    app.get('/games/tictactoe/:id', (req, res) => {
+    app.get('/games/tictactoe/:id', (req, res, next) => {
+        try {
+            if (!req.session || !req.session.user) {
+                return res.redirect('/signin');
+            }
 
-        if (!req.session || !req.session.user) {
-            return res.redirect('/signin');
+            const game = activeGames[req.params.id];
+
+            if (!game) {
+                return res.redirect('/games/tictactoe');
+            }
+
+            // Get the opponent's user id for chat purposes :
+            const receiver_id = req.session.user.username === game.player1
+                ? game.player2_id
+                : game.player1_id;
+
+            res.render("games/tictactoe.ejs", { 
+                is_connect: true, 
+                is_display_buttons: true,
+                gameId: req.params.id,              
+                username: req.session.user.username,
+                user_id : req.session.user.id,
+                receiver_id : receiver_id,
+            });
+        } catch (err) {
+            console.error('Error in GET /games/tictactoe/:id:', err);
+            return next(err);
         }
-        
-        const game = activeGames[req.params.id];
-
-        if (!game) {
-            return res.redirect('/games/tictactoe');
-        }
-
-        // Get the opponent's user id for chat purposes :
-        const receiver_id = req.session.user.username === game.player1
-            ? game.player2_id
-            : game.player1_id;
-
-        res.render("games/tictactoe.ejs", { 
-            is_connect: true, 
-            is_display_buttons: true,
-            gameId: req.params.id,              
-            username: req.session.user.username,
-            user_id : req.session.user.id,
-            receiver_id : receiver_id,
-        }); 
     });
 
     // Syncronization point use by the front for refresh the game state :

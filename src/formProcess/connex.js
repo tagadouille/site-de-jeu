@@ -11,7 +11,7 @@ export function runConnex(server) {
     let app = server.app;
     let baseUrl = server.action;
 
-    app.get('/signin', (req, res) => {
+    app.get('/signin', (req, res, next) => {
 
         if(req.session && req.session.user) {
             return res.redirect('/profile');
@@ -19,7 +19,7 @@ export function runConnex(server) {
         res.render("Form/formConnex.ejs", { action: baseUrl });
     });
 
-    app.post('/signin', async (req, res) => {
+    app.post('/signin', async (req, res, next) => {
 
         if(req.session && req.session.user) {
             return res.redirect('/profile');
@@ -57,8 +57,8 @@ export function runConnex(server) {
             res.redirect('/profile');
         }
         catch (err) {
-            console.log(err);
-            return res.status(401).send("Username or password is incorrect.");
+            console.error('Unexpected error in POST /signin:', err);
+            return next(err);
         }
     });
 }

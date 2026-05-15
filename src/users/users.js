@@ -7,7 +7,7 @@ export function runUsers(server) {
 
     
 
-    app.get('/users', async (req, res) => {
+    app.get('/users', async (req, res, next) => {
         //Récupération des filtres depuis l'URL
         const searchQuery = req.query.search || "";
         const gameQuery = req.query.game || "all";
@@ -124,7 +124,7 @@ export function runUsers(server) {
 
         } catch (err) {
             console.error('Error retrieving users:', err);
-            res.status(500).send("Error retrieving users. Please try again later.");
+            return next(err);
         } finally {
             if (client) {
                 client.release(); 

@@ -12,7 +12,7 @@ export function runProfile(server) {
     let baseUrl = server.action;
 
 
-    app.get('/profile', async (req, res) => {
+    app.get('/profile', async (req, res, next) => {
 
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
@@ -68,11 +68,11 @@ export function runProfile(server) {
 
         } catch (err) {
             console.error("Erreur BDD (GET /profile) :", err);
-            res.status(500).send("Erreur serveur.");
+            return next(err);
         }
     });
 
-    app.post('/profile', async (req, res) => {
+    app.post('/profile', async (req, res, next) => {
 
         if (!req.session || !req.session.user) {
             return res.redirect('/signin');
@@ -110,7 +110,7 @@ export function runProfile(server) {
         } catch (err) {
             if (client) await client.query("ROLLBACK");
             console.error("Error BDD (POST /profile) :", err);
-            res.redirect('/profile');
+            return next(err);
         } finally {
             if (client) client.release();
         }
