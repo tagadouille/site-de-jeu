@@ -13,7 +13,7 @@ export function runConnex(server) {
 
     app.get('/signin', (req, res, next) => {
 
-        if(req.session && req.session.user) {
+        if (req.session && req.session.user) {
             return res.redirect('/profile');
         }
         res.render("Form/formConnex.ejs", { action: baseUrl });
@@ -21,7 +21,7 @@ export function runConnex(server) {
 
     app.post('/signin', async (req, res, next) => {
 
-        if(req.session && req.session.user) {
+        if (req.session && req.session.user) {
             return res.redirect('/profile');
         }
 
@@ -42,12 +42,12 @@ export function runConnex(server) {
                 return res.status(401).send("Username or password is incorrect.");
             }
 
-            await set_online(server.pool, username);
-
             if (!(await verifyPassword(password, user.password))) {
                 console.log("Error: Incorrect password");
                 return res.status(401).send("Username or password is incorrect.");
             }
+
+            await set_online(server.pool, username);
 
             console.log(`User ${user.username} logged in successfully!`);
 
