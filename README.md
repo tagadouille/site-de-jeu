@@ -1,5 +1,5 @@
 # ProjetWEB
-# 🎮 GameHub — Plateforme multijoueur en ligne
+# Plateforme multijoueur en ligne
 
 ## 📌 Présentation
 
@@ -169,8 +169,8 @@ Avant de lancer le projet, installer :
 ## 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/votre-utilisateur/gamehub.git
-cd gamehub
+git clone https://github.com/tagadouille/site-de-jeu.git
+cd site-de-jeu
 ```
 
 ---
@@ -188,7 +188,7 @@ npm install
 Créer une base de données :
 
 ```sql
-CREATE DATABASE gamehub;
+CREATE DATABASE site_bdd;
 ```
 
 ---
@@ -196,7 +196,7 @@ CREATE DATABASE gamehub;
 ## 4. Initialiser la base de données
 
 ```bash
-psql -U postgres -d gamehub -f database/init.sql
+psql -U site_admin -d site_bdd -f BDD.sql
 ```
 
 ---
